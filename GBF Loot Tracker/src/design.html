@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<title>Loot Tracker Design</title>
+	<link rel="icon" href="img/favcon.png">
+	<link rel='stylesheet' href='styles/help.css'>
+</head>
+<body>
+  <header>
+		<div id="header"><h1>Granblue Fantasy Loot Tracker Module v1.0.0</h1></div>
+	</header>
+  <div id="c-content">
+    <div class="title">How it works</div>
+    <div class="questionTitle">• Intro</div>
+    <p>This extension was started as a fun project for me to learn how extensions work, 
+		and hopefully get a working loot tracker at the end of it. 
+		When I started, I didn't know how javascript worked so the road to today was paved 
+		with many mistakes. If you were hoping to create your own extension to silently collect 
+		data from Granblue Fantasy, this should be a nice resource to use. 
+		On this page, I will explain how the <span>service_worker.js</span> collects data from the game.</p>
+	  <div class="questionTitle">1) The service worker finds which tabs are about to view a results screen</div>
+	  <p>This is handled by the <span>chrome.tabs.onUpdated</span> event listener 
+      as well as the <span>onAttach</span> function.</p>
+    <img class="uml" src="img/design/tabAttach.png">
+    <div class="questionTitle">2)	The network listener grabs the data</div>
+    <p>Now that the tab has a debugger attached and received the <span>Network.enable</span> command, 
+      all network requests involving that tab will trigger an event picked up by the 
+      <span>networkListener</span> function. The whole process of grabbing the data 
+      is handled by the <span>networkListener</span> function.</p>
+    <img class="uml" src="img/design/fileCapture.png">
+    <div class="questionTitle">3) The data is processed and stored in chrome's localstorage</div>
+    <p>Once the <span>networkListener</span> function passed the data to <span>ProcessRewardJSON</span>, 
+      it is processed and stored for easy use by other parts of the extension. The function extracts the useful data, 
+    uses that data to find which enemy was killed, and stores that data in that enemy's table</p>
+    <img class="uml" src="img/design/processData.png">
+  </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "GBF Loot Tracker",
+  "description": "Base Level Extension",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "options_page": "src/module.html",
+
+  "permissions": [
+    "tabs",
+    "debugger",
+    "storage",
+    "unlimitedStorage"
+  ],
+
+  "host_permissions": [
+    "*://*.granbluefantasy.jp/*"
+  ],
+
+  "background": {
+    "service_worker": "src/scripts/service_worker.js"
+  },
+  
+  "icons": {
+    "16": "src/img/favcon.png",
+    "48": "src/img/favcon.png",
+    "128": "src/img/favcon.png"
+  },
+
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": "src/img/icon.png"
+  }
+}

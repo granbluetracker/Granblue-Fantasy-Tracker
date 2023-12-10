@@ -1,0 +1,31 @@
+body {
+    margin: 0px;
+    background-color: #231e18;
+}
+#nav {
+    width: 20em;
+    height: 10em;
+    border-image: url(../img/background/moduleBackgroundClipped.png) 20 fill;
+    border-width: 1em;
+    size: 1.1;
+    border-style: solid;
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    color: white;
+    line-height: 1.3;
+}
+
+a {
+    font-size: x-large;
+    margin: auto;
+    text-decoration: none;
+    color: white;
+    transition: all 400ms ease-in-out;
+}
+
+a:hover {
+    color: #88aeb7;
+    transition: all 400ms ease-in-out;
+}
