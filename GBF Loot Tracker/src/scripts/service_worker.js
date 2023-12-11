@@ -2,6 +2,9 @@ console.log('Service worker has started...');
 let requestLog = [];
 let requestLogAll = [];
 
+const debuggerTimeoutDurationMS = 5000;
+const loadingFinishedDelayMS = 100;
+
 const soloResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result\/\\d{10}"); // Regex for a url on the solo fight result page
 const raidResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}"); // Regex for a url on the raid result page
 // Regex for a url on ANY fight result page
@@ -44,7 +47,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     console.log("This can happen if loot data was somehow missed and timeout did not yet expire. \nRemoving and restarting timeout to catch new rewards screen...");
     if (debuggerTimeout){
       clearTimeout(debuggerTimeout);
-      debuggerTimeout = setTimeout(function() {RemoveDebugger({"tabId": tabId}, false);}, 5000);
+      debuggerTimeout = setTimeout(function() {RemoveDebugger({"tabId": tabId}, false);}, debuggerTimeoutDurationMS);
     }
   }
 });
@@ -64,28 +67,35 @@ function onAttach(tabId) {
     }, "Network.enable");
     console.log("Network Enabled. Waiting for response");
     // Removes debugger automatically after 5 seconds
-    debuggerTimeout = setTimeout(function() {RemoveDebugger({"tabId": tabId}, false);}, 5000);
+    debuggerTimeout = setTimeout(function() {RemoveDebugger({"tabId": tabId}, true);}, debuggerTimeoutDurationMS);
   }
   catch(error){console.log("An error occured at onAttach...", error);}
 }
+
+var responseReceivedEpoch = 0;
 
 // Listens to all network messages coming from debugged tabs
 function NetworkListener(debuggeeId, message, params){
   if(debuggeeId.tabId != targetTabId){return;}
   requestLogAll.push([message, params, debuggeeId.tabId]);
-  if (message == "Network.requestWillBeSent" && rewardUrlRegex.test(params.request.url)){
+  if (message == "Network.responseReceived" && rewardUrlRegex.test(params.response.url)){
     requestId = params.requestId;
-    requestLog.push([message, params, debuggeeId.tabId]);
+    requestLog.push([message, 0, params, debuggeeId.tabId]);
+    console.log("RequestId found: " + requestId + " " + params.requestId);
+    responseReceivedEpoch = Date.now();
     return;
   }
   if (params.requestId != requestId){return;}
-  requestLog.push([message, params, debuggeeId.tabId]);
+  requestLog.push([message, Date.now() - responseReceivedEpoch, params, debuggeeId.tabId]);
   // When the reward JSON finishes loading, requests it
   if (message == "Network.loadingFinished"){
     // Checks and sets lock to prevent multiple requests to the tab for data
     if (isRequesting){return;}
     isRequesting = true;
     // Sends the command to grab the reward data JSON
+    console.log("Time Between = " + (Date.now() - responseReceivedEpoch));
+    setTimeout(() => { // Delays fetching response body so that it is ready
+    console.log("Loading is finished!", "RequestId = " + params.requestId + " " + requestId, [message, params, debuggeeId.tabId], requestLog);
     chrome.debugger.sendCommand({
       "tabId" : debuggeeId.tabId
     }, "Network.getResponseBody", {
@@ -94,6 +104,9 @@ function NetworkListener(debuggeeId, message, params){
       // Processes the reward data if response had a body
       if (response == undefined){
         console.log("Response body was empty... WTF!");
+        console.log("Response Recieved at: " + responseReceivedEpoch)
+        console.log("Time since first message: " + (Date.now() - responseReceivedEpoch));
+        console.log(requestLog, requestLogAll);
         clearTimeout(debuggerTimeout); // Removes timeout so that RemoveDebugger doesn't activate prematurely if you open another reward screen
         RemoveDebugger(debuggeeId, false);
       }
@@ -104,6 +117,7 @@ function NetworkListener(debuggeeId, message, params){
         RemoveDebugger(debuggeeId, false);
       }
     });
+    }, loadingFinishedDelayMS);
   }
 }
 
@@ -177,14 +191,14 @@ function RemoveDebugger(debuggeeId, dumpRequestLog){
   try{
   chrome.debugger.getTargets(async function (result){
     // Creates bool that shows if the debuggeeId has a debugger attached
-    hasDebugger = result.filter(function(e){return e.attached==true}).filter(function(e){return e.tabId==debuggeeId.tabId}).length > 0;; 
+    hasDebugger = result.filter(function(e){return e.attached==true}).filter(function(e){return e.tabId==debuggeeId.tabId}).length > 0;
+    if (dumpRequestLog){await PrintDebugState(requestLog, requestLogAll)}
     if (hasDebugger){
       console.log("\n[4]Removing debugger from tab: ", debuggeeId);
       targetTabId = 0; // Resets the targeted tab used by NetworkListener()
       await chrome.debugger.sendCommand({ 
         "tabId": debuggeeId.tabId
       }, "Network.disable");
-      if (dumpRequestLog){console.log(requestLog); console.log([requestLogAll]);}
       requestLog = [];
       requestLogAll = [];
       // await chrome.debugger.getTargets(function (result){console.log("Target list before: ", result.filter(function(e){return e.attached==true}))});
@@ -193,6 +207,14 @@ function RemoveDebugger(debuggeeId, dumpRequestLog){
     }
   })}
   catch(error){console.log("Debugger was already detatched... ", error)}
+}
+
+async function PrintDebugState(requestLog, requestLogAll) {
+  console.log("Is requesting lock state: " + isRequesting);
+  console.log("Current Target Tab Id: " + targetTabId);
+  console.log("Current request Id: " + requestId);
+  console.log("All logged requests: ", requestLogAll);
+  console.log("logged requests for drop: ", requestLog);
 }
 
 /**
