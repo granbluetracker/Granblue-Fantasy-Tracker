@@ -14,6 +14,10 @@ This extension was just updated to work with the new Granblue Fantasy update tha
 3) Drag the "GBF Loot Tracker" folder that you unpacked onto the tab that has "chrome://extensions/" open which will automatically install it
 4) Enjoy using the extension!
 
+# How to update
+
+Simply drag the contents of the folder extracted from the updated version into the folder you are storing the extension and click replace all. Go to "chrome://extensions/" and click the refresh button on the extension to reload it.
+
 # Removing the ("GBF Loot Tracker" started debugging this browser) notification
 As a security measure, chrome will display this banner whenever an extension uses the debugger library. This extension uses this library to read data sent to your game whenever it sees you at the URL of a battle results page. To disable it, do the following:
 1) Right click your Google Chrome icon on your home screen and select "Properties"
