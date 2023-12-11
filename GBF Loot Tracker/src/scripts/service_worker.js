@@ -6,10 +6,10 @@ const soloResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#resu
 const raidResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}"); // Regex for a url on the raid result page
 // Regex for a url on ANY fight result page
 const resultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result\/\\d{10}|^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}");
-const raidRewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/resultmulti\/data\/\\d{11}"); // Regex for the request url containing raid battle data
+const raidRewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/resultmulti\/content\/index\/\\d{11}"); // Regex for the request url containing raid battle data
 const soloRewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/data\/\\d{10}"); // Regex for the request url containing solo battle data
  // Regex for the request url containing ANY battle data
-const rewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/data\/\\d{10}|^https:\/\/game.granbluefantasy.jp\/resultmulti\/data\/\\d{11}");
+const rewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/data\/\\d{10}|^https:\/\/game.granbluefantasy.jp\/resultmulti\/content\/index\/\\d{11}");
 const sandboxStavesRegex = new RegExp("^replicard\/stage\/[2-5]"); // Sandbox zone E-H URL
 const sandboxSwordsRegex = new RegExp("^replicard\/stage\/[6-9]"); // Sandbox zone I-L URL
 const sandboxGenesisRegex = new RegExp("^replicard\/stage\/10"); // Sandbox zone M URL
@@ -109,10 +109,10 @@ function NetworkListener(debuggeeId, message, params){
 
 // Processes and stores the reward data recieved from the server
 async function ProcessRewardJSON(tabId, response){
-  // Reverts the response's body back into a JSON
+  // Changes response body from string to JSON and extracts + stores relevant data
   try{
     body = JSON.parse(response.body);
-    console.log(body);
+    body = body.option.result_data;
     rewardList = body.rewards.reward_list;
     console.log("Parsed rewards list:", rewardList);
     // Build row to send

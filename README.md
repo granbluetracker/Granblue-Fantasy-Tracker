@@ -3,8 +3,9 @@ This is an extension that can automatically track the loot you receive from raid
 
 This extension does not interact directly with the game so it won't be detected. Use of third party tools is still against the terms of service so use at your own risk. This extension will always run in the background and capture data whenever you visit a results page. You will never have to manually track your drops again!
 
-#WARNING
-The update that the game recieved today broke the extension. I am currently in the process of updating it and it should be working again in a couple hours. Please be sure to download the new version when it releases!
+# Notice
+
+This extension was just updated to work with the new Granblue Fantasy update that released today. Please reinstall the extension to continue using. Thank you for your patience!
 
 # Installation
 
