@@ -5,7 +5,7 @@ This extension does not interact directly with the game so it won't be detected.
 
 # Notice
 
-This extension was just updated to work with the new Granblue Fantasy update that released today. Please reinstall the extension to continue using. Thank you for your patience!
+With yesterday's update, the reward data is sometimes loaded before the extension can capture it which means it only works sometimes. An update will soon be comming to fix this issue so please bear with me while I fix this. Stay tuned for version 1.0.2!
 
 # Installation
 
