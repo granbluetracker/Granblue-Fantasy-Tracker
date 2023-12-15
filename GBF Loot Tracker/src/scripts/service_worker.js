@@ -2,8 +2,9 @@ console.log('Service worker has started...');
 let requestLog = [];
 let requestLogAll = [];
 
-const debuggerTimeoutDurationMS = 5000;
-const loadingFinishedDelayMS = 100;
+
+
+const gameUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp");
 
 const soloResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result\/\\d{10}"); // Regex for a url on the solo fight result page
 const raidResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}"); // Regex for a url on the raid result page
@@ -17,40 +18,83 @@ const sandboxStavesRegex = new RegExp("^replicard\/stage\/[2-5]"); // Sandbox zo
 const sandboxSwordsRegex = new RegExp("^replicard\/stage\/[6-9]"); // Sandbox zone I-L URL
 const sandboxGenesisRegex = new RegExp("^replicard\/stage\/10"); // Sandbox zone M URL
 
-var debuggerTimeout; // Where the debugger timeout is stored so that it can be set and removed in different scopes
-var isRequesting = false; // Lock that will stop the extension from processing a battle twice if the game sends duplicate loadingFinished messages
-var targetTabId = 0; // Tells NetworkListener() to ignore all messages not coming from this tabId
-var requestId = "0.0"; // Var that will store the request ID for the loot table
+var trackedRequest = []; // Tracks the last loot file info
+var trackedFileLookup = [ // Unused for now, will come into play when arcarum and more free quest support gets added
+  {
+    "FileNameRegex" : raidRewardUrlRegex,
+    "RequiredLocation" : raidResultUrlRegex
+  }
+];
+var activeDebuggers = []; // Stores an up to date list of every debugger attached to a tab
+
 
 // Adds event listener to function to listen to events from debugged tabs
 if (!chrome.debugger.onEvent.hasListener(NetworkListener)){
   console.log("Activating listener on NetworkListener")
   chrome.debugger.onEvent.addListener(NetworkListener);
-  listenerStatus = chrome.debugger.onEvent.hasListener(NetworkListener)
-  console.log("false --> " + listenerStatus);
+  let networkListenerStatus = chrome.debugger.onEvent.hasListener(NetworkListener)
+  console.log("false --> " + networkListenerStatus);
 }
 
-/* Monitors the state of all tabs and attaches debugger when a tab is on a loot screen */
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  // Returns if tab hasn't finished loading or isn't on results screen
-  // Use "loading" instead of "complete" so you won't miss the "Network.requestWillBeSent" message for the battle results JSON
-  // If you don't, around 10% of the time the "Network.enable" command won't make it in time!
-  if (!(changeInfo.status === "loading") || !resultUrlRegex.test(tab.url)){return;}
+if (!chrome.tabs.onUpdated.hasListener(TabListener)){
+  console.log("Activating listener on TabListener")
+  chrome.tabs.onUpdated.addListener(TabListener);
+  let TabListenerStatus = chrome.tabs.onUpdated.hasListener(TabListener);
+  console.log("false --> " + TabListenerStatus);
+}
+
+// Adds debugger when tab visits game and removes when it leaves
+function TabListener(tabId, changeInfo, tab){
+  // Attaches to tab as soon as it starts loading
+  if (!(changeInfo.status === "loading")){return;}
+  let isOnGame = gameUrlRegex.test(tab.url);
+  let hasDebuggerAttached = activeDebuggers.some(item => item.tabId == tabId);
+  if (isOnGame && !hasDebuggerAttached) {
+    console.log("On game at: " + tab.url, "Adding debugger to: " + tabId);
+    AddDebugger(tabId);
+  }
+  else if (!isOnGame && hasDebuggerAttached) {
+    console.log("Left game at: " + tab.url, "Removing debugger from: " + tabId);
+    RemoveDebugger({"tabId":tabId});
+  }
+}
+
+function AddDebugger(tabId) {
   try {
     chrome.debugger.attach({
       tabId: tabId
     }, "1.0", onAttach.bind(null, tabId));
-    console.log("Tab is on results: " + tab.url, "\n[1]Valid target found that matches: " + tabId, "Attempting to attach..");
   }
   catch(error){
     console.log("Results tab already has a debugger attached...", error);
-    console.log("This can happen if loot data was somehow missed and timeout did not yet expire. \nRemoving and restarting timeout to catch new rewards screen...");
-    if (debuggerTimeout){
-      clearTimeout(debuggerTimeout);
-      debuggerTimeout = setTimeout(function() {RemoveDebugger({"tabId": tabId}, false);}, debuggerTimeoutDurationMS);
+  }
+}
+
+// Removes debugger
+async function RemoveDebugger(debuggeeId){
+  try{
+    // Creates bool that shows if the debuggeeId has a debugger attached
+    let hasDebugger = activeDebuggers.filter(function(e){return e.tabId==debuggeeId.tabId}).length > 0;
+    if (hasDebugger){
+      console.log("\n[4]Removing debugger from tab: ", debuggeeId);
+      requestLog = [];
+      requestLogAll = [];
+      await chrome.debugger.detach(debuggeeId);
+      await chrome.debugger.getTargets(function (result){
+        activeDebuggers = result.filter(function(e){return e.attached==true})
+        console.log("Active debuggers list updated: ", activeDebuggers);
+      });
     }
   }
-});
+  catch(error){console.log("Debugger was already detatched... ", error)}
+}
+
+function printActiveDebuggers(printAll) {
+  chrome.debugger.getTargets(function (result){
+    if (printAll){result = result.filter(function(e){return e.attached==true})}
+    console.log(result);
+  });
+}
 
 /**
  * Handles attatched debugger and facilitates the transfer of game data to local storage
@@ -58,81 +102,95 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
  */
 function onAttach(tabId) {
   try{
-    isRequesting = false; // Opens lock
-    targetTabId = tabId; // Tells NetworkListener to capture packets from this tab
-    // Turns on the network library
-    console.log("[2]Debugger is attached. Enabling network commands...")
     chrome.debugger.sendCommand({ 
       "tabId": tabId
     }, "Network.enable");
-    console.log("Network Enabled. Waiting for response");
-    // Removes debugger automatically after 5 seconds
-    debuggerTimeout = setTimeout(function() {RemoveDebugger({"tabId": tabId}, true);}, debuggerTimeoutDurationMS);
+    console.log("[2] Network Enabled. Waiting for response");
+    chrome.debugger.getTargets(async function (result){
+      activeDebuggers = result.filter(function(e){return e.attached==true})
+      console.log("Active debuggers updated: ", activeDebuggers);
+    })
   }
-  catch(error){console.log("An error occured at onAttach...", error);}
+  catch(error){
+    console.log("An error occured at onAttach...", error);
+    chrome.debugger.getTargets(async function (result){
+      activeDebuggers = result.filter(function(e){return e.attached==true})
+      console.log("Active debuggers updated: ", activeDebuggers);
+    })
+  }
 }
 
-var responseReceivedEpoch = 0;
 
 // Listens to all network messages coming from debugged tabs
-function NetworkListener(debuggeeId, message, params){
-  if(debuggeeId.tabId != targetTabId){return;}
-  requestLogAll.push([message, params, debuggeeId.tabId]);
-  if (message == "Network.responseReceived" && rewardUrlRegex.test(params.response.url)){
-    requestId = params.requestId;
-    requestLog.push([message, 0, params, debuggeeId.tabId]);
-    console.log("RequestId found: " + requestId + " " + params.requestId);
-    responseReceivedEpoch = Date.now();
+async function NetworkListener(debuggeeId, message, params){
+  if (message == "Network.requestWillBeSent" && rewardUrlRegex.test(params.request.url)){
+    console.log("Request found that matches file URL");
+    //let tabUrl = await chrome.tabs.get(debuggeeId.tabId);
+    //tabUrl = tabUrl.url;
+    //if (raidResultUrlRegex.test(tabUrl)){
+      // This message is the start of an actual loot result file. Add to the stack
+      console.log("detected requestWillBeSent from: " + params.request.url);
+      trackedRequest = [params.requestId, debuggeeId.tabId, Date.now()];
+      requestLog.push([message, 0, params, debuggeeId.tabId]);
+    //  console.log("Request passed URL check with: " + tabUrl);
+    //}
+    //else {console.log("Request didn't pass URL check: " + tabUrl);}
     return;
   }
-  if (params.requestId != requestId){return;}
-  requestLog.push([message, Date.now() - responseReceivedEpoch, params, debuggeeId.tabId]);
-  // When the reward JSON finishes loading, requests it
+  else if (params.requestId != trackedRequest[0]){return;}
+  requestLog.push([message, 0, params, debuggeeId.tabId]);
   if (message == "Network.loadingFinished"){
-    // Checks and sets lock to prevent multiple requests to the tab for data
-    if (isRequesting){return;}
-    isRequesting = true;
-    // Sends the command to grab the reward data JSON
-    console.log("Time Between = " + (Date.now() - responseReceivedEpoch));
-    setTimeout(() => { // Delays fetching response body so that it is ready
-    console.log("Loading is finished!", "RequestId = " + params.requestId + " " + requestId, [message, params, debuggeeId.tabId], requestLog);
-    chrome.debugger.sendCommand({
-      "tabId" : debuggeeId.tabId
-    }, "Network.getResponseBody", {
-      "requestId": params.requestId
-    }, function(response) {
-      // Processes the reward data if response had a body
-      if (response == undefined){
-        console.log("Response body was empty... WTF!");
-        console.log("Response Recieved at: " + responseReceivedEpoch)
-        console.log("Time since first message: " + (Date.now() - responseReceivedEpoch));
-        console.log(requestLog, requestLogAll);
-        clearTimeout(debuggerTimeout); // Removes timeout so that RemoveDebugger doesn't activate prematurely if you open another reward screen
-        RemoveDebugger(debuggeeId, false);
-      }
-      else {
-        ProcessRewardJSON(debuggeeId.tabId, response);
-        console.log("Successfully exiting with debugeeId: ", debuggeeId);
-        clearTimeout(debuggerTimeout); // Removes timeout so that RemoveDebugger doesn't activate prematurely if you open another reward screen
-        RemoveDebugger(debuggeeId, false);
-      }
+    console.log("loadingFinished event matched requestId. Congrats!");
+    await sendCommandPromise(debuggeeId.tabId, params)
+    .then((response) => {
+      console.log("%c Succeeded in getting data!", "color: lime;");
+      ProcessRewardJSON(response);
+      console.log(requestLog);
+      requestLog = [];
+      }).catch((error) => {
+      console.log("Error occured fetching loot data file: ", error);
     });
-    }, loadingFinishedDelayMS);
   }
 }
 
+function sendCommandPromise(tabId, params) {
+  return new Promise((resolve, reject) => {
+    try{
+      chrome.debugger.sendCommand(
+        {"tabId" : tabId
+      }, "Network.getResponseBody", {
+        "requestId": params.requestId
+      }, function(response) {
+        if (chrome.runtime.lastError){
+          reject(chrome.runtime.lastError);
+        }
+        else if (!response || !response.body) {
+          console.error("Response was empty");
+          reject(new Error("Response was empty"));
+        }
+        else {resolve(response);}
+      });
+    }
+    catch(ex){
+      console.log("Error fetching resource");
+      reject(ex)
+    }
+  });
+}
+
+
 // Processes and stores the reward data recieved from the server
-async function ProcessRewardJSON(tabId, response){
+async function ProcessRewardJSON(response){
   // Changes response body from string to JSON and extracts + stores relevant data
   try{
-    body = JSON.parse(response.body);
-    body = body.option.result_data;
-    rewardList = body.rewards.reward_list;
+    var body = JSON.parse(response.body);
+    var body = body.option.result_data;
+    var rewardList = body.rewards.reward_list;
     console.log("Parsed rewards list:", rewardList);
     // Build row to send
     var tableEntry = BuildTableEntry(rewardList);
     // Finds the enemy name
-    enemyName = FindEnemyName(tableEntry.itemList, body.quest_type, body.url)
+    var enemyName = FindEnemyName(tableEntry.itemList, body.quest_type, body.url)
     if (enemyName == "Unknown"){console.log("Enemy was unknown"); return;}
     console.log("Enemy was determined to be: " + enemyName);
     StoreRow(enemyName, tableEntry);
@@ -148,10 +206,10 @@ function BuildTableEntry(rewardList){
   console.log("Building table entry: ");
   // Build row to send
   var tableEntry = {epochTime: Date.now(), blueChest: 0, redChest: 0, itemList: {}}
-  tempItemList = {};
-  for (row in rewardList){ // Iterates over arrays 1-15 in the reward list
-    tableRow = rewardList[row];
-    for (element in tableRow){
+  var tempItemList = {};
+  for (let row in rewardList){ // Iterates over arrays 1-15 in the reward list
+    let tableRow = rewardList[row];
+    for (let element in tableRow){
       var item = tableRow[element];
       var itemCount = item.count;
       // adds prefix to item depending on the type
@@ -183,38 +241,6 @@ function BuildTableEntry(rewardList){
   tableEntry.itemList = tempItemList;
   console.log(tableEntry);
   return tableEntry;
-}
-
-// Removes debugger
-function RemoveDebugger(debuggeeId, dumpRequestLog){
-  // Gets all tabs with debugger attached
-  try{
-  chrome.debugger.getTargets(async function (result){
-    // Creates bool that shows if the debuggeeId has a debugger attached
-    hasDebugger = result.filter(function(e){return e.attached==true}).filter(function(e){return e.tabId==debuggeeId.tabId}).length > 0;
-    if (dumpRequestLog){await PrintDebugState(requestLog, requestLogAll)}
-    if (hasDebugger){
-      console.log("\n[4]Removing debugger from tab: ", debuggeeId);
-      targetTabId = 0; // Resets the targeted tab used by NetworkListener()
-      await chrome.debugger.sendCommand({ 
-        "tabId": debuggeeId.tabId
-      }, "Network.disable");
-      requestLog = [];
-      requestLogAll = [];
-      // await chrome.debugger.getTargets(function (result){console.log("Target list before: ", result.filter(function(e){return e.attached==true}))});
-      await chrome.debugger.detach(debuggeeId);
-      // await chrome.debugger.getTargets(function (result){console.log("Target list after: ", result.filter(function(e){return e.attached==true}))});
-    }
-  })}
-  catch(error){console.log("Debugger was already detatched... ", error)}
-}
-
-async function PrintDebugState(requestLog, requestLogAll) {
-  console.log("Is requesting lock state: " + isRequesting);
-  console.log("Current Target Tab Id: " + targetTabId);
-  console.log("Current request Id: " + requestId);
-  console.log("All logged requests: ", requestLogAll);
-  console.log("logged requests for drop: ", requestLog);
 }
 
 /**
@@ -263,7 +289,7 @@ async function StoreRow(key, value){
  * @param {JSON} item2 
  */
 function mergeItemList(item1, item2){
-  for(key in item2){
+  for(let key in item2){
     if (item1.hasOwnProperty(key)){
       item1[key] += item2[key];
     }
@@ -281,7 +307,7 @@ function mergeItemList(item1, item2){
  */
 function FindEnemyName(lootList, battleType, returnUrl){
   // Uses loot and the type of battle to determine which enemy it came from
-  lootList = Object.keys(lootList);
+  var lootList = Object.keys(lootList);
   switch(battleType){
     // 1 = raid, 25 = sandbox
     case 1:
@@ -290,7 +316,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
       // or: at least one item of this type must be in the list
       // prohibit: none of these items can be in the list
       // "Boss Name" : [[instant],[required],[or],[prohibit]],
-      lootSignature = {
+      var lootSignature = {
         "Proto Bahamut" :[["1030202400", "1030702300", "1030302000", "1030102500", "1030402200", "1030601400", "1030002900", "1030900600", "1030801200", "1030502500"],[],[],[]],
         "Proto Bahamut HL" :[["59", "79"],[],[],[]],
         "Ultimate Bahamut" :[["137", "139"],[],[],[]],
@@ -328,7 +354,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Qilin" : [["208"],[],[],["528", "529", "530", "531"]],
         "Tyrant" : [["10116"],[],[],[]],
       }
-      for (boss in lootSignature){
+      for (let boss in lootSignature){
         // If there is an instant field, you can decide if it is the right boss instantly
         if (lootSignature[boss][0].length>0){
             if(lootSignature[boss][0].some(r=> lootList.includes(r))){return boss}
@@ -343,7 +369,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
       return "Unknown"
     case 25:
       // Orb, orb+, tome, scroll, veritas(s)
-      elementSignature = {
+      var elementSignature = {
         "Fire" : ["1011", "1012", "1311", "1312", "25051", "25055"],
         "Water" : ["1021", "1022", "1321", "1322", "25047", "25054"],
         "Earth" : ["1031", "1032", "1331", "1332", "25048", "25052"],
@@ -351,18 +377,18 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Light" : ["1051", "1052", "1351", "1352", "25053"],
         "Dark" : ["1061", "1062", "1361", "1362", "25049"],
       }
-      lusters = ["25070", "25071", "25072", "25073"]
-      doppelworldBosses = {
+      var lusters = ["25070", "25071", "25072", "25073"]
+      var doppelworldBosses = {
         "replicard/stage/6":"Xeno Ifrit Militis", "replicard/stage/7":"Xeno Cocytus Militis", "replicard/stage/8":"Xeno Vohu Manah Militis", "replicard/stage/9":"Xeno Sagittarius Militis"
       };
-      swordsBosses = {
+      var swordsBosses = {
         "replicard/stage/6":"Athena Militis", "replicard/stage/7":"Grani Militis", "replicard/stage/8":"Baal Militis", "replicard/stage/9":"Garuda Militis"
       };
-      swordsBossMats = ["25075", "25076", "25077", "25078", "25079", "25080", "25081", "25082"]
-      genesisBosses = {
+      var swordsBossMats = ["25075", "25076", "25077", "25078", "25079", "25080", "25081", "25082"]
+      var genesisBosses = {
         "25017":"The World", "25085":"Prometheus Militis", "25086":"Ca Ong Militis", "25085":"Gilgamesh Militis", "25085":"Morrigna Militis"
       }
-      zones = {
+      var zones = {
       "replicard/stage/2":"Zone Eletio", "replicard/stage/3":"Zone Faym", "replicard/stage/4":"Zone Goliath", "replicard/stage/5":"Zone Harbinger", 
       "replicard/stage/6":"Zone Invidia", "replicard/stage/7":"Zone Joculator", "replicard/stage/8":"Zone Kalendae", "replicard/stage/9":"Zone Liber",
       "replicard/stage/10":"Zone Mundus",
@@ -376,17 +402,17 @@ function FindEnemyName(lootList, battleType, returnUrl){
           if (swordsBossMats.some(r=> lootList.includes(r))){return doppelworldBosses[returnUrl]}
           else{return swordsBosses[returnUrl]}
         }
-        for (element in elementSignature){
+        for (let element in elementSignature){
           if (elementSignature[element].some(r=> lootList.includes(r))){return zones[returnUrl] + " " + element;}
         }
       }
       // Zone M
       if (returnUrl == "replicard/stage/10"){
         console.log(returnUrl+" is in zone M");
-        for (id in genesisBosses){
+        for (let id in genesisBosses){
           if (lootList.includes(id)){return genesisBosses[id]}
         }
-        for (element in elementSignature){
+        for (let element in elementSignature){
           if (elementSignature[element].some(r=> lootList.includes(r))){return zones[returnUrl] + " " + element;}
         }
       }

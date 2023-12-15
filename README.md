@@ -5,7 +5,7 @@ This extension does not interact directly with the game so it won't be detected.
 
 # Notice
 
-This extension was just updated to work with the new Granblue Fantasy update that released today. Please reinstall the extension to continue using. Thank you for your patience!
+This extension was just updated to version 1.0.3! With this update, the success rate for capturing reward data is now back to 100%. Enjoy your half ap event and look forward to arcarum support and an auto updater in version 1.0.5!
 
 # Installation
 
