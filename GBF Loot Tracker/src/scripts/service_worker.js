@@ -1,4 +1,4 @@
-console.log('Service worker has started...');
+console.log('%c[+]Service worker has started...', "color:lime;");
 let requestLog = [];
 let requestLogAll = [];
 
@@ -27,38 +27,40 @@ var trackedFileLookup = [ // Unused for now, will come into play when arcarum an
 ];
 var activeDebuggers = []; // Stores an up to date list of every debugger attached to a tab
 
+/**********************************/
+/* Listener and support functions */
+/**********************************/
 
-// Adds event listener to function to listen to events from debugged tabs
+
+// Adds listeners for network events and tab changes
 if (!chrome.debugger.onEvent.hasListener(NetworkListener)){
-  console.log("Activating listener on NetworkListener")
+  console.log("%c[+]Activating listener on NetworkListener", "color:lime;")
   chrome.debugger.onEvent.addListener(NetworkListener);
   let networkListenerStatus = chrome.debugger.onEvent.hasListener(NetworkListener)
-  console.log("false --> " + networkListenerStatus);
+  console.log("%c[info]false --> " + networkListenerStatus, "color:aqua;");
 }
-
 if (!chrome.tabs.onUpdated.hasListener(TabListener)){
-  console.log("Activating listener on TabListener")
+  console.log("%c[+]Activating listener on TabListener", "color:lime;")
   chrome.tabs.onUpdated.addListener(TabListener);
   let TabListenerStatus = chrome.tabs.onUpdated.hasListener(TabListener);
-  console.log("false --> " + TabListenerStatus);
+  console.log("%c[info]false --> " + TabListenerStatus, "color:aqua;");
 }
 
-// Adds debugger when tab visits game and removes when it leaves
+// Dynamically adds/removes debugger when a tab enter/leaves granblue fantasy
 function TabListener(tabId, changeInfo, tab){
-  // Attaches to tab as soon as it starts loading
-  if (!(changeInfo.status === "loading")){return;}
+  // Excludes tabs that aren't loading or are chrome extension pages
+  if (!(changeInfo.status === "loading") || tab.url.startsWith("chrome-extension://")){return;}
   let isOnGame = gameUrlRegex.test(tab.url);
   let hasDebuggerAttached = activeDebuggers.some(item => item.tabId == tabId);
   if (isOnGame && !hasDebuggerAttached) {
-    console.log("On game at: " + tab.url, "Adding debugger to: " + tabId);
     AddDebugger(tabId);
   }
   else if (!isOnGame && hasDebuggerAttached) {
-    console.log("Left game at: " + tab.url, "Removing debugger from: " + tabId);
     RemoveDebugger({"tabId":tabId});
   }
 }
 
+// Attaches debugger to target tab
 function AddDebugger(tabId) {
   try {
     chrome.debugger.attach({
@@ -66,70 +68,65 @@ function AddDebugger(tabId) {
     }, "1.0", onAttach.bind(null, tabId));
   }
   catch(error){
-    console.log("Results tab already has a debugger attached...", error);
+    console.log("%c[error]Results tab already has a debugger attached...", "color:red;", error);
   }
 }
 
-// Removes debugger
-async function RemoveDebugger(debuggeeId){
-  try{
-    // Creates bool that shows if the debuggeeId has a debugger attached
-    let hasDebugger = activeDebuggers.filter(function(e){return e.tabId==debuggeeId.tabId}).length > 0;
-    if (hasDebugger){
-      console.log("\n[4]Removing debugger from tab: ", debuggeeId);
-      requestLog = [];
-      requestLogAll = [];
-      await chrome.debugger.detach(debuggeeId);
-      await chrome.debugger.getTargets(function (result){
-        activeDebuggers = result.filter(function(e){return e.attached==true})
-        console.log("Active debuggers list updated: ", activeDebuggers);
-      });
-    }
-  }
-  catch(error){console.log("Debugger was already detatched... ", error)}
-}
-
-function printActiveDebuggers(printAll) {
-  chrome.debugger.getTargets(function (result){
-    if (printAll){result = result.filter(function(e){return e.attached==true})}
-    console.log(result);
-  });
-}
-
-/**
- * Handles attatched debugger and facilitates the transfer of game data to local storage
- * @param {int} tabId
- */
+// Enables network events on debugged tab. These events are listened to by the NetworkListener() function
 function onAttach(tabId) {
   try{
+    console.log("%c[+]New debugger added to: " + tabId, "color:lime;");
     chrome.debugger.sendCommand({ 
       "tabId": tabId
     }, "Network.enable");
-    console.log("[2] Network Enabled. Waiting for response");
+    console.log("%c[+]Network Enabled. Waiting for response", "color:lime;");
     chrome.debugger.getTargets(async function (result){
       activeDebuggers = result.filter(function(e){return e.attached==true})
-      console.log("Active debuggers updated: ", activeDebuggers);
+      console.log("%c[info]Active debuggers updated: ", "color:aqua;", activeDebuggers);
     })
   }
   catch(error){
     console.log("An error occured at onAttach...", error);
     chrome.debugger.getTargets(async function (result){
       activeDebuggers = result.filter(function(e){return e.attached==true})
-      console.log("Active debuggers updated: ", activeDebuggers);
+      console.log("%c[info]Active debuggers updated: ", "color:aqua;", activeDebuggers);
     })
   }
 }
 
+// Removes debugger from target tab
+async function RemoveDebugger(debuggeeId){
+  try{
+    // Creates bool that shows if the debuggeeId has a debugger attached
+    let hasDebugger = activeDebuggers.filter(function(e){return e.tabId==debuggeeId.tabId}).length > 0;
+    if (hasDebugger){
+      console.log("%c[-]Removing debugger from tab: ", "color:red;", debuggeeId);
+      requestLog = [];
+      requestLogAll = [];
+      await chrome.debugger.detach(debuggeeId);
+      await chrome.debugger.getTargets(function (result){
+        activeDebuggers = result.filter(function(e){return e.attached==true})
+        console.log("%c[info]Active debuggers updated: ", "color:aqua;", activeDebuggers);
+      });
+    }
+  }
+  catch(error){console.log("%c[error]Debugger was already detatched... ", "color:red;", error)}
+}
+
+/************************************************************************/
+/* [Step 1] Functions that retrieve all files of interest from the game */
+/************************************************************************/
 
 // Listens to all network messages coming from debugged tabs
 async function NetworkListener(debuggeeId, message, params){
   if (message == "Network.requestWillBeSent" && rewardUrlRegex.test(params.request.url)){
-    console.log("Request found that matches file URL");
+    console.log("%c[Step 1] RETRIEVING DATA", "color:coral;");
+    console.log("%c[1.1]Request found that matches file URL", "color:coral;");
     //let tabUrl = await chrome.tabs.get(debuggeeId.tabId);
     //tabUrl = tabUrl.url;
     //if (raidResultUrlRegex.test(tabUrl)){
       // This message is the start of an actual loot result file. Add to the stack
-      console.log("detected requestWillBeSent from: " + params.request.url);
+      console.log("%c[1.2]detected requestWillBeSent from: " + params.request.url, "color:coral;");
       trackedRequest = [params.requestId, debuggeeId.tabId, Date.now()];
       requestLog.push([message, 0, params, debuggeeId.tabId]);
     //  console.log("Request passed URL check with: " + tabUrl);
@@ -140,19 +137,20 @@ async function NetworkListener(debuggeeId, message, params){
   else if (params.requestId != trackedRequest[0]){return;}
   requestLog.push([message, 0, params, debuggeeId.tabId]);
   if (message == "Network.loadingFinished"){
-    console.log("loadingFinished event matched requestId. Congrats!");
+    console.log("%c[1.3]loadingFinished event matched requestId. Congrats!", "color:coral;");
     await sendCommandPromise(debuggeeId.tabId, params)
     .then((response) => {
-      console.log("%c Succeeded in getting data!", "color: lime;");
+      console.log("%c[1.4]Succeeded in getting data!", "color: coral;");
+      console.log("%c[info]Message chain for retrieved file", "color:coral;", requestLog);
       ProcessRewardJSON(response);
-      console.log(requestLog);
       requestLog = [];
       }).catch((error) => {
-      console.log("Error occured fetching loot data file: ", error);
+      console.log("%cError occured fetching loot data file: ", error, "color:red;");
     });
   }
 }
 
+// Function to return response body and handle errors that may arrise
 function sendCommandPromise(tabId, params) {
   return new Promise((resolve, reject) => {
     try{
@@ -179,31 +177,37 @@ function sendCommandPromise(tabId, params) {
 }
 
 
+/*****************************************************/
+/* [Step 2] Functions to process any retrieved files */
+/*****************************************************/
+
 // Processes and stores the reward data recieved from the server
 async function ProcessRewardJSON(response){
   // Changes response body from string to JSON and extracts + stores relevant data
+  console.log("%c[Step 2] PROCESSING DATA", "color:cornflowerblue;");
   try{
     var body = JSON.parse(response.body);
+    if (!body.option.hasOwnProperty("result_data")){ // Returns if enemy didn't drop any loot
+      console.log("%c[!]Boss did not drop any rewards", "color:orange;");
+      return;
+    }
     var body = body.option.result_data;
     var rewardList = body.rewards.reward_list;
-    console.log("Parsed rewards list:", rewardList);
+    console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
     // Build row to send
     var tableEntry = BuildTableEntry(rewardList);
     // Finds the enemy name
     var enemyName = FindEnemyName(tableEntry.itemList, body.quest_type, body.url)
-    if (enemyName == "Unknown"){console.log("Enemy was unknown"); return;}
-    console.log("Enemy was determined to be: " + enemyName);
+    if (enemyName == "Unknown"){console.log("%c[!]Enemy was unknown", "color:orange;"); return;}
+    console.log("%c[2.5]Enemy name found: " + enemyName, "color:cornflowerblue;");
     StoreRow(enemyName, tableEntry);
   }
-  catch (error){console.log("Error was found while processing reward data...", error);}
+  catch (error){console.log("%c[error]A problem occured while processing reward data...", "color:red;", error);}
 }
 
-/**
- * formats the game's "reward_list" array so that it can be efficiently stored
- * @param {Array} rewardList
- */
+// Processes the reward_list JSON into the format that will be stored
 function BuildTableEntry(rewardList){
-  console.log("Building table entry: ");
+  console.log("%c[2.2]Building table entry", "color:cornflowerblue;");
   // Build row to send
   var tableEntry = {epochTime: Date.now(), blueChest: 0, redChest: 0, itemList: {}}
   var tempItemList = {};
@@ -212,7 +216,7 @@ function BuildTableEntry(rewardList){
     for (let element in tableRow){
       var item = tableRow[element];
       var itemCount = item.count;
-      // adds prefix to item depending on the type
+      // adds prefix to items that need one
       switch(item.item_kind){
         case 4:
           var itemType = "stam";
@@ -232,80 +236,20 @@ function BuildTableEntry(rewardList){
       if (row == 4){tableEntry.redChest += 1;}
       if (row == 11){tableEntry.blueChest += 1;}
       
-      // If the item in the reward list is not stored in the item list
+      // Adds processed item if it's ID is not already in the item list
       if (!tempItemList.hasOwnProperty(itemId)){tempItemList[itemId] = +itemCount;}
-      // If the item already exists in the item list, merge them
+      // Merges item totals if it's ID is already in the item list
       else {tempItemList[itemId] += +itemCount;}
     }
   }
   tableEntry.itemList = tempItemList;
-  console.log(tableEntry);
+  console.log("%c[2.3]Built table entry", "color:cornflowerblue;", tableEntry);
   return tableEntry;
 }
 
-/**
- * Stores data from a battle using the enemy name as a key
- * @param {string} key
- * @param {JSON} value 
- */
-async function StoreRow(key, value){
-  var table = await getObjectFromLocalStorage(key);
-  // Builds new table if it does not exist
-  if (table == null){
-    console.log("Table was not found. Building new table...")
-    var table = new Array();
-    defaultHead = Object.assign({}, value);
-    // Adds killcount + lastIndex and deletes epochTime field from header rows
-    defaultHead.kills = 1;
-    defaultHead.lastIndex = 5;
-    delete defaultHead["epochTime"];
-    // Builds table with 5 rows containing values from first kill
-    // Rows in order are stored Total, CurrentGrind, Monthly, Weekly, Daily
-    for(var i=0; i<=4; i++){
-        table[i] = Object.assign({}, defaultHead);
-    }
-    // Adds first kill details to row 5
-    table[5] = value;
-  }
-
-  else {
-      for (let i = 0; i <=4; i++){
-        table[i].kills += 1;
-        table[i].blueChest += value.blueChest;
-        table[i].redChest += value.redChest;
-        table[i].itemList = mergeItemList(table[i].itemList, value.itemList);
-      }
-  }
-
-  // Adds new row to table
-  table[table.length] = value;
-  await saveObjectInLocalStorage({[key]: table});
-  console.log("Boss data was added to storage...")
-}
-
-/**
- * Merges 2 JSONs together combining like values
- * @param {JSON} item1
- * @param {JSON} item2 
- */
-function mergeItemList(item1, item2){
-  for(let key in item2){
-    if (item1.hasOwnProperty(key)){
-      item1[key] += item2[key];
-    }
-    else {
-      item1[key] = item2[key];
-    }
-  }
-  return item1;
-}
-
-/**
- * Lookup an enemy name using their loot
- * @param {JSON} lootList
- * @param {boolean} isRaid 
- */
+// Finds the name of the enemy by determining which can produce the data captured in step 1
 function FindEnemyName(lootList, battleType, returnUrl){
+  console.log("%c[2.4]Finding enemy name", "color:cornflowerblue;");
   // Uses loot and the type of battle to determine which enemy it came from
   var lootList = Object.keys(lootList);
   switch(battleType){
@@ -366,7 +310,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
         return boss;
       }
       // Did not match any known loot signature
-      return "Unknown"
+      return "Unknown";
     case 25:
       // Orb, orb+, tome, scroll, veritas(s)
       var elementSignature = {
@@ -376,8 +320,8 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Wind" : ["1041", "1042", "1341", "1342", "25050", "25056"],
         "Light" : ["1051", "1052", "1351", "1352", "25053"],
         "Dark" : ["1061", "1062", "1361", "1362", "25049"],
-      }
-      var lusters = ["25070", "25071", "25072", "25073"]
+      };
+      var lusters = ["25070", "25071", "25072", "25073"];
       var doppelworldBosses = {
         "replicard/stage/6":"Xeno Ifrit Militis", "replicard/stage/7":"Xeno Cocytus Militis", "replicard/stage/8":"Xeno Vohu Manah Militis", "replicard/stage/9":"Xeno Sagittarius Militis"
       };
@@ -387,7 +331,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
       var swordsBossMats = ["25075", "25076", "25077", "25078", "25079", "25080", "25081", "25082"]
       var genesisBosses = {
         "25017":"The World", "25085":"Prometheus Militis", "25086":"Ca Ong Militis", "25085":"Gilgamesh Militis", "25085":"Morrigna Militis"
-      }
+      };
       var zones = {
       "replicard/stage/2":"Zone Eletio", "replicard/stage/3":"Zone Faym", "replicard/stage/4":"Zone Goliath", "replicard/stage/5":"Zone Harbinger", 
       "replicard/stage/6":"Zone Invidia", "replicard/stage/7":"Zone Joculator", "replicard/stage/8":"Zone Kalendae", "replicard/stage/9":"Zone Liber",
@@ -420,11 +364,73 @@ function FindEnemyName(lootList, battleType, returnUrl){
   } 
 }
 
-/** API for chrome storage */
-/**
- * Retrieve object from Chrome's Local StorageArea
- * @param {string} key 
- */
+// Perminantly stores the reward info in the table for a boss
+async function StoreRow(key, value){
+  console.log("%c[2.6]Storing table entry", "color:cornflowerblue;");
+  var table = await getObjectFromLocalStorage(key);
+  // Builds new table if it does not exist
+  if (table == null){
+    console.log("%c[info]Table was not found. Building new table...", "color:orange;")
+    var table = new Array();
+    defaultHead = Object.assign({}, value);
+    // Adds killcount + lastIndex and deletes epochTime field from header rows
+    defaultHead.kills = 1;
+    defaultHead.lastIndex = 5;
+    delete defaultHead["epochTime"];
+    // Builds table with 5 rows containing values from first kill
+    // Rows in order are stored Total, CurrentGrind, Monthly, Weekly, Daily
+    for(var i=0; i<=4; i++){
+        table[i] = Object.assign({}, defaultHead);
+    }
+    // Adds first kill details to row 5
+    table[5] = value;
+  }
+
+  else {
+      for (let i = 0; i <=4; i++){
+        table[i].kills += 1;
+        table[i].blueChest += value.blueChest;
+        table[i].redChest += value.redChest;
+        table[i].itemList = mergeItemList(table[i].itemList, value.itemList);
+      }
+  }
+
+  // Adds new row to table
+  table[table.length] = value;
+  await saveObjectInLocalStorage({[key]: table});
+  console.log("%c[2.7]Table entry was successfully stored", "color:cornflowerblue;");
+}
+
+/*****************************************/
+/* Functions to help debug the extension */
+/*****************************************/
+
+// Gets all active debuggers and prints them if the variable activeDebuggers isn't correct
+function printActiveDebuggers(printAll) {
+  chrome.debugger.getTargets(function (result){
+    if (printAll){result = result.filter(function(e){return e.attached==true})}
+    console.log(result);
+  });
+}
+
+/*********************************/
+/* Lower level support functions */
+/*********************************/
+
+// Merges like values of 2 JSONs and returns the combined result
+function mergeItemList(item1, item2){
+  for(let key in item2){
+    if (item1.hasOwnProperty(key)){
+      item1[key] += item2[key];
+    }
+    else {
+      item1[key] = item2[key];
+    }
+  }
+  return item1;
+}
+
+/* Returns object from chrome's local storage */
 const getObjectFromLocalStorage = async function(key) {
   return new Promise((resolve, reject) => {
     try {
@@ -438,10 +444,7 @@ const getObjectFromLocalStorage = async function(key) {
   });
 };
 
-/**
- * Save Object in Chrome's Local StorageArea
- * @param {*} obj 
- */
+/* Stores object from chrome's local storage */
 const saveObjectInLocalStorage = async function(obj) {
   return new Promise((resolve, reject) => {
     try {

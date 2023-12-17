@@ -102,6 +102,7 @@ async function populateLoot(bossData){
     var bossData = await getObjectFromLocalStorage(selectedBoss);
     // Exits function if boss's loot table was empty
     if (bossData == null){console.log(selectedBoss + "\'s loot table was empty"); return}
+    console.log("%cBoss Data: ", "color:aqua;", [bossData]);
     // Initializes boss's stat counters in module
     // Recalculates if data period is set to monthly, weekly, or daily
     if (dataPeriodIndex > 0){bossData = await recalculateData(bossData);}
