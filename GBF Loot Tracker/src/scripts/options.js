@@ -31,13 +31,12 @@ const timerText = document.getElementById('text-Timer');
 const validBosses = [
   "*Pre Bar Grind", "05Proto Bahamut", "06Ultimate Bahamut", "04Grand Order",
   "*Bar Grind", "16Ultimate Bahamut HL", "14Akasha", "16Grand Order HL", "15Proto Bahamut HL",
-  "*Uncap Grind", "06Lindwurm", "09The Four Primarchs", "06Lucilius", "06Lucilius (Hard)", "06Beelzebub", "06Belial",
+  "*Uncap Grind", "06Lindwurm", "09The Four Primarchs", "06Lucilius", "06Lucilius (Hard)", "06Beelzebub", "06Belial", "26The World",
   "*Ennead Raids", "20Atum", "21Tefnut", "22Bennu", "23Ra", "24Horus", "25Osiris",
   "*Six Dragons", "20Wilnas", "21Wamdus", "22Galleon", "23Ewiyar", "24Lu Woh", "25Fediel",
   "*Revans", "20Mugen", "21Diaspora", "22Siegfried", "23Seofon", "24Cosmos", "25Agastia",
   "*High Difficulty", "06Super Ultimate Bahamut", "08Hexachromatic Hierarch",
   "*Rise of the Beasts", "17Huanglong and Qilin", "14Huanglong", "15Qilin",
-  "*Guild War", "06Tyrant", "06Nightmare 95",
 ];
 
 var tempValidBossesStripped = [];
@@ -482,6 +481,36 @@ const saveObjectInLocalStorage = async function(obj) {
 // Replaces all instances of idTarget with idReplace in the bossName's loot table
 // NOTE: This function isn't used in regular opperation, but for fixing loot tables if I fucked something up
 // WARNING: Misusing this function can ruin an enemies loot table
+
+function GetLatestVersion(){
+  const apiUrl = 'https://api.github.com/repos/granbluetracker/Granblue-Fantasy-Tracker/releases/latest';
+  const options = {
+    "method": "GET",
+    "header": {
+    "User-Agent": "Granblue-Fantasy-Tracker",
+    "Accept": "application/vnd.github+json",
+    "X-Github-Api-Version": "2022-11-28",
+    }
+  }
+
+  // Make a request to the GitHub Releases API through the CORS proxy
+  fetch(apiUrl, options)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch latest release: ${response.status} ${response.statusText}');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(data);
+      const latestVersion = data.tag_name;
+      console.log('Latest release version:' + latestVersion);
+    })
+    .catch(error => {
+      console.error('Error:', error.message);
+    });
+}
+
 async function fixLoot(bossName, idOld, idNew){
   var count = 0;
   bossTable = await getObjectFromLocalStorage(bossName);

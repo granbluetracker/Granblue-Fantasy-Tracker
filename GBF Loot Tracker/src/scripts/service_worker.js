@@ -1,7 +1,9 @@
-console.log('%c[+]Service worker has started...', "color:lime;");
 let requestLog = [];
 let requestLogAll = [];
 
+var currentVersion = chrome.runtime.getManifest();
+currentVersion = currentVersion.version;
+console.log(`%c[v${currentVersion}]Service worker has started...`, "color:cyan;");
 
 
 const gameUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp");
@@ -187,7 +189,7 @@ async function ProcessRewardJSON(response){
   console.log("%c[Step 2] PROCESSING DATA", "color:cornflowerblue;");
   try{
     var body = JSON.parse(response.body);
-    if (!body.option.hasOwnProperty("result_data")){ // Returns if enemy didn't drop any loot
+    if (!body.hasOwnProperty("option") || !body.option.hasOwnProperty("result_data")){ // Returns if enemy didn't drop any loot
       console.log("%c[!]Boss did not drop any rewards", "color:orange;");
       return;
     }
@@ -296,7 +298,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Huanglong and Qilin" : [["528", "529", "530", "531"],[],[],[]],
         "Huanglong" : [["206"],[],[],["528", "529", "530", "531"]],
         "Qilin" : [["208"],[],[],["528", "529", "530", "531"]],
-        "Tyrant" : [["10116"],[],[],[]],
+        "The World" : [["25017"],[],[],[]],
       }
       for (let boss in lootSignature){
         // If there is an instant field, you can decide if it is the right boss instantly
