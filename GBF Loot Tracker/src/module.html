@@ -10,7 +10,7 @@
   </head>
   <body>
     <header>
-      <div id="header"><h1>Granblue Fantasy Loot Tracker Module v1.0.4</h1></div>
+      <div id="header"><h1>Granblue Fantasy Loot Tracker Module v1.0.5</h1></div>
     </header>
 
     <div id="body">
@@ -22,7 +22,9 @@
                 <p class="panelTitleText">Loot Settings</p>
               </div>
               <div id="lootPanelBody" class="panelBody">
-  
+                <div class="panelItem">
+                  <div id="sephiraButton">View Sephira Box Data</div>
+                </div>
               </div>            
             </div>
           </div>
@@ -74,26 +76,159 @@
           
 
           <div id="c-bossSummary">
-            <div id="bossSummary"></div>
-            <div id="c-bossSummaryStat">
-              <div class="summaryItem">
-                <div class="summaryText">Kills: </div>
-                <div id="text-killCountSummary" class="summaryText">0</div>
+            <div id="bossSummary">
+              <div id="bossPortrait"></div>
+              <div id="c-bossSummaryStat">
+                <div class="summaryItem">
+                  <div class="summaryText">Kills: </div>
+                  <div id="text-killCountSummary" class="summaryText">0</div>
+                </div>
+                <div class="summaryItem">
+                  <div class="summaryText">Blue Chests: </div>
+                  <div id="text-blueCountSummary" class="summaryText">0</div>
+                </div>
+                <div class="summaryItem">
+                  <div class="summaryText">Red Chests: </div>
+                  <div id="text-redCountSummary" class="summaryText">0</div>
+                </div>
+                <div class="summaryItem">
+                  <div class="summaryText">Data Period: </div>
+                  <div id="text-dataTypeSummary" class="summaryText">All</div>
+                </div>
+                <div class="summaryItem">
+                  <div id="text-Timer" class="summaryText hidden"> </div>
+                </div>
               </div>
-              <div class="summaryItem">
-                <div class="summaryText">Blue Chests: </div>
-                <div id="text-blueCountSummary" class="summaryText">0</div>
+            </div>
+          </div>
+          <div id="c-sephiraSummary" class="hidden"> <!-- class="hidden" -->
+            <div id="sephiraSummary">
+              <img class="sephiraTitle" src="./img/icon/sephira//sephTitle1.png">
+              <div id="sephiraSummaryRow1" class="sephiraSummaryRow"> <!-- Here be staves -->
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep15.png"></div>
+                  <div id="sep1Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep19.png"></div>
+                  <div id="sep2Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock sephiraSpacer">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep17.png"></div>
+                  <div id="sep3Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep11.png"></div>
+                  <div id="sep4Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep18.png"></div>
+                  <div id="sep5Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep13.png"></div>
+                  <div id="sep6Count" class="sephiraCount">0</div>
+                </div>
               </div>
-              <div class="summaryItem">
-                <div class="summaryText">Red Chests: </div>
-                <div id="text-redCountSummary" class="summaryText">0</div>
+              <div id="sephiraSummaryRow2" class="sephiraSummaryRow"> <!-- Here be swords -->
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep12.png"></div>
+                  <div id="sep7Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep16.png"></div>
+                  <div id="sep8Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock sephiraSpacer">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep13.png"></div>
+                  <div id="sep9Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep14.png"></div>
+                  <div id="sep10Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep11.png"></div>
+                  <div id="sep11Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep17.png"></div>
+                  <div id="sep12Count" class="sephiraCount">0</div>
+                </div>
               </div>
-              <div class="summaryItem">
-                <div class="summaryText">Data Period: </div>
-                <div id="text-dataTypeSummary" class="summaryText">All</div>
+              <img class="sephiraTitle" src="./img/icon/sephira//sephTitle2.png">
+              <div id="sephiraSummaryRow3" class="sephiraSummaryRow"> <!-- Here be swords -->
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep101.png"></div>
+                  <div id="sep13Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep105.png"></div>
+                  <div id="sep14Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep102.png"></div>
+                  <div id="sep15Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep106.png"></div>
+                  <div id="sep16Count" class="sephiraCount">0</div>
+                </div>
               </div>
-              <div class="summaryItem">
-                <div id="text-Timer" class="summaryText hidden"> </div>
+              <div id="sephiraSummaryRow4" class="sephiraSummaryRow">
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep103.png"></div>
+                  <div id="sep17Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep106.png"></div>
+                  <div id="sep18Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep104.png"></div>
+                  <div id="sep19Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep105.png"></div>
+                  <div id="sep20Count" class="sephiraCount">0</div>
+                </div>
+              </div>
+              <img class="sephiraTitle" src="./img/icon/sephira//sephTitle3.png">
+              <div id="sephiraSummaryRow5" class="sephiraSummaryRow"> <!-- Genesis Creationis -->
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep101.png"></div>
+                  <div id="sep21Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep102.png"></div>
+                  <div id="sep22Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep103.png"></div>
+                  <div id="sep23Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep104.png"></div>
+                  <div id="sep24Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep105.png"></div>
+                  <div id="sep25Count" class="sephiraCount">0</div>
+                </div>
+                <div class="sephiraStatBlock">
+                  <div class="sephiraBackgroundImage"><img class="sephiraIcon" src="./img/icon/sephira/sep106.png"></div>
+                  <div id="sep26Count" class="sephiraCount">0</div>
+                </div>
+              </div>
+              <div id="sephiraSummaryStats" class="sephiraSummaryRow"> <!-- Total boxes + period -->
+                <div class="sephiraSummaryStatsItem">
+                  <div class="sephiraSummaryStatsTitle">Total Chests Obtained:</div>
+                  <div id="sephiraSummaryStatsCount" class="sephiraSummaryStatsValue">0</div>
+                </div>
+                <div class="sephiraSummaryStatsItem">
+                  <div class="sephiraSummaryStatsTitle">Data Period:</div>
+                  <div id="sephiraSummaryStatsPeriod" class="sephiraSummaryStatsValue">All</div>
+                </div>
               </div>
             </div>
           </div>

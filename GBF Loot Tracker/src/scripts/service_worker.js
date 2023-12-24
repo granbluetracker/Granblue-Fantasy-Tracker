@@ -13,12 +13,16 @@ const raidResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#resu
 // Regex for a url on ANY fight result page
 const resultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result\/\\d{10}|^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}");
 const raidRewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/resultmulti\/content\/index\/\\d{11}"); // Regex for the request url containing raid battle data
-const soloRewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/data\/\\d{10}"); // Regex for the request url containing solo battle data
+const soloRewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/content\/index\/\\d{10}"); // Regex for the request url containing solo battle data
  // Regex for the request url containing ANY battle data
-const rewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/data\/\\d{10}|^https:\/\/game.granbluefantasy.jp\/resultmulti\/content\/index\/\\d{11}");
+const rewardUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/content\/index\/\\d{10}|^https:\/\/game.granbluefantasy.jp\/resultmulti\/content\/index\/\\d{11}");
 const sandboxStavesRegex = new RegExp("^replicard\/stage\/[2-5]"); // Sandbox zone E-H URL
 const sandboxSwordsRegex = new RegExp("^replicard\/stage\/[6-9]"); // Sandbox zone I-L URL
 const sandboxGenesisRegex = new RegExp("^replicard\/stage\/10"); // Sandbox zone M URL
+// Regex for any file containing sephira box data
+const sephiraUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/sephirabok_stock_list\\?_=|^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/open_sephirabox\\?_=");
+const sephiraStockRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/sephirabok_stock_list\\?_="); // File showing current chest stock
+const sephiraOpenRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/open_sephirabox\\?_="); // File showing items from opening chests 
 
 var trackedRequest = []; // Tracks the last loot file info
 var trackedFileLookup = [ // Unused for now, will come into play when arcarum and more free quest support gets added
@@ -121,19 +125,15 @@ async function RemoveDebugger(debuggeeId){
 
 // Listens to all network messages coming from debugged tabs
 async function NetworkListener(debuggeeId, message, params){
-  if (message == "Network.requestWillBeSent" && rewardUrlRegex.test(params.request.url)){
+  if (message == "Network.requestWillBeSent" && (rewardUrlRegex.test(params.request.url) || sephiraOpenRegex.test(params.request.url))){
     console.log("%c[Step 1] RETRIEVING DATA", "color:coral;");
     console.log("%c[1.1]Request found that matches file URL", "color:coral;");
-    //let tabUrl = await chrome.tabs.get(debuggeeId.tabId);
-    //tabUrl = tabUrl.url;
-    //if (raidResultUrlRegex.test(tabUrl)){
-      // This message is the start of an actual loot result file. Add to the stack
-      console.log("%c[1.2]detected requestWillBeSent from: " + params.request.url, "color:coral;");
-      trackedRequest = [params.requestId, debuggeeId.tabId, Date.now()];
-      requestLog.push([message, 0, params, debuggeeId.tabId]);
-    //  console.log("Request passed URL check with: " + tabUrl);
-    //}
-    //else {console.log("Request didn't pass URL check: " + tabUrl);}
+    let fileType = "";
+    if (rewardUrlRegex.test(params.request.url)){fileType = "Battle Data"}
+    else {fileType = "Sephira Results"}
+    console.log("%c[1.2]detected requestWillBeSent from: " + params.request.url + " of type: " + fileType, "color:coral;");
+    trackedRequest = [params.requestId, debuggeeId.tabId, fileType, Date.now()];
+    requestLog.push([message, 0, params, debuggeeId.tabId]);
     return;
   }
   else if (params.requestId != trackedRequest[0]){return;}
@@ -144,7 +144,18 @@ async function NetworkListener(debuggeeId, message, params){
     .then((response) => {
       console.log("%c[1.4]Succeeded in getting data!", "color: coral;");
       console.log("%c[info]Message chain for retrieved file", "color:coral;", requestLog);
-      ProcessRewardJSON(response);
+      switch(trackedRequest[2]){
+        case "Battle Data":
+          ProcessRewardJSON(response);
+          break;
+        case "Sephira Results":
+          ProcessSephiraJSON(response);
+          break;
+        default:
+          console.log("%c[error]fileType did not match any known values: " + trackedRequest[2], "color:red;");
+          break;
+      }
+      
       requestLog = [];
       }).catch((error) => {
       console.log("%cError occured fetching loot data file: ", error, "color:red;");
@@ -197,7 +208,7 @@ async function ProcessRewardJSON(response){
     var rewardList = body.rewards.reward_list;
     console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
     // Build row to send
-    var tableEntry = BuildTableEntry(rewardList);
+    var tableEntry = BuildTableEntry(body);
     // Finds the enemy name
     var enemyName = FindEnemyName(tableEntry.itemList, body.quest_type, body.url)
     if (enemyName == "Unknown"){console.log("%c[!]Enemy was unknown", "color:orange;"); return;}
@@ -208,8 +219,9 @@ async function ProcessRewardJSON(response){
 }
 
 // Processes the reward_list JSON into the format that will be stored
-function BuildTableEntry(rewardList){
+function BuildTableEntry(body){
   console.log("%c[2.2]Building table entry", "color:cornflowerblue;");
+  var rewardList = body.rewards.reward_list;
   // Build row to send
   var tableEntry = {epochTime: Date.now(), blueChest: 0, redChest: 0, itemList: {}}
   var tempItemList = {};
@@ -222,6 +234,9 @@ function BuildTableEntry(rewardList){
       switch(item.item_kind){
         case 4:
           var itemType = "stam";
+          break;
+        case 55:
+          var itemType = "box";
           break;
         case 73:
           var itemType = "emp";
@@ -244,6 +259,15 @@ function BuildTableEntry(rewardList){
       else {tempItemList[itemId] += +itemCount;}
     }
   }
+
+  // Adds sephira box to reward list as an item if one drops
+  if (body.quest_type == 25 && body.replicard.sephirabox_stock_data != null){
+    let sephiraBoxId = "sep" + body.replicard.sephirabox_stock_data.card_number;
+    tempItemList[sephiraBoxId] = 1;
+    console.log("%c[info]New Sephira box detected: " + sephiraBoxId, "color:cornflowerblue;");
+    UpdateSephiraStock(sephiraBoxId, body.url);
+  }
+
   tableEntry.itemList = tempItemList;
   console.log("%c[2.3]Built table entry", "color:cornflowerblue;", tableEntry);
   return tableEntry;
@@ -315,6 +339,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
       return "Unknown";
     case 25:
       // Orb, orb+, tome, scroll, veritas(s)
+      console.log("Return URL: " + returnUrl);
       var elementSignature = {
         "Fire" : ["1011", "1012", "1311", "1312", "25051", "25055"],
         "Water" : ["1021", "1022", "1321", "1322", "25047", "25054"],
@@ -332,7 +357,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
       };
       var swordsBossMats = ["25075", "25076", "25077", "25078", "25079", "25080", "25081", "25082"]
       var genesisBosses = {
-        "25017":"The World", "25085":"Prometheus Militis", "25086":"Ca Ong Militis", "25085":"Gilgamesh Militis", "25085":"Morrigna Militis"
+        "25017":"The World (Solo)", "25085":"Prometheus Militis", "25086":"Ca Ong Militis", "25085":"Gilgamesh Militis", "25085":"Morrigna Militis"
       };
       var zones = {
       "replicard/stage/2":"Zone Eletio", "replicard/stage/3":"Zone Faym", "replicard/stage/4":"Zone Goliath", "replicard/stage/5":"Zone Harbinger", 
@@ -363,7 +388,10 @@ function FindEnemyName(lootList, battleType, returnUrl){
         }
       }
       return "Unknown";
-  } 
+    default:
+      console.log("%c[!]Battle type was not tracked: " + battleType, "color:orange;");
+      return "Unknown";
+    } 
 }
 
 // Perminantly stores the reward info in the table for a boss
@@ -372,7 +400,7 @@ async function StoreRow(key, value){
   var table = await getObjectFromLocalStorage(key);
   // Builds new table if it does not exist
   if (table == null){
-    console.log("%c[info]Table was not found. Building new table...", "color:orange;")
+    console.log("%c[!]Table was not found. Building new table...", "color:orange;")
     var table = new Array();
     defaultHead = Object.assign({}, value);
     // Adds killcount + lastIndex and deletes epochTime field from header rows
@@ -401,6 +429,78 @@ async function StoreRow(key, value){
   table[table.length] = value;
   await saveObjectInLocalStorage({[key]: table});
   console.log("%c[2.7]Table entry was successfully stored", "color:cornflowerblue;");
+}
+
+function UpdateSephiraStock(boxName, returnUrl){
+  try{
+    console.log("%c[Step 3] Recording new sephira box drop", "color:cyan;");
+    console.log("%c[2.1]Finding box ID", "color:cyan;");
+    var sephiraBoxSignatures = {
+      "replicard/stage/2" : {"sep15":"1", "sep19":"2", "sep17":"3"}, // Zone Eletio
+      "replicard/stage/3" : {"sep11":"4", "sep18":"5", "sep13":"6"}, // Zone Faym
+      "replicard/stage/4" : {"sep12":"7", "sep16":"8", "sep13":"9"}, // Zone Goliath
+      "replicard/stage/5" : {"sep14":"10", "sep11":"11", "sep17":"12"}, // Zone Harbinger
+      "replicard/stage/6" : {"sep101":"13", "sep105":"14"}, // Zone Invidia
+      "replicard/stage/7" : {"sep102":"15", "sep106":"16"}, // Zone Joculator
+      "replicard/stage/8" : {"sep103":"17", "sep106":"18"}, // Zone Kalendae
+      "replicard/stage/9" : {"104":"19", "105":"20"}, // Zone Liber
+      "replicard/stage/10" : {"sep101":"21", "sep102":"22", "sep103":"23", "sep104":"24", "sep105":"25", "sep106":"26"}, // Zone Mundus
+    }
+    var sephBoxIndex = "boxId" + sephiraBoxSignatures[returnUrl][boxName];
+    var boxTableRow = {};
+    boxTableRow.epochTime = Date.now();
+    boxTableRow.redChest = 0;
+    boxTableRow.blueChest = 0;
+    boxTableRow.itemList = {[sephBoxIndex] : 1};
+    console.log(boxTableRow);
+    console.log("%c[2.2]Box Table Row was built, Sending to StoreRow: ", "color:cyan;", [boxTableRow]);
+    StoreRow("Sephira Boxes", boxTableRow);
+  }
+  catch(error){console.log("%c[error]An error occured in UpdateSephiraStock: ", "color:red;", error);}
+  
+
+}
+
+function ProcessSephiraJSON(response){
+  try{
+    console.log("%c[Step 2] LOGGING SEPHIRA BOX RESULTS", "color:cyan;")
+    var body = JSON.parse(response.body);
+    console.log(body);
+    var rewardList = body.reward_list;
+    console.log(rewardList);
+    var sephiraTableRow = {};
+    sephiraTableRow.epochTime = Date.now();
+    sephiraTableRow.redChest = 0;
+    sephiraTableRow.blueChest = 0;
+    sephiraTableRow.itemList = {};
+    for (item of rewardList){
+      let itemId = item.item_id
+      let itemQuantity = item.number;
+      // Extracts each item from the JSON and stores it in sephiraTableRow.itemList
+      switch(item.item_kind){
+        case 4:
+          var itemType = "stam";
+          break;
+        case 55:
+          var itemType = "box";
+          break;
+        case 73:
+          var itemType = "emp";
+          break;
+        case 88:
+          var itemType = "bonus";
+          break;
+        default:
+          var itemType = "";
+          break;
+      }
+      let itemName = itemType + itemId;
+      sephiraTableRow.itemList[itemName] = itemQuantity;
+    }
+    console.log(sephiraTableRow);
+    StoreRow("Sephira Drops", sephiraTableRow);
+  }
+  catch(error){console.log("%c[error]An error occured in ProcessSephiraJSON: ", "color:red;", error);}
 }
 
 /*****************************************/

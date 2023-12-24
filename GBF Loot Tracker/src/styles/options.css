@@ -200,7 +200,7 @@ div
 }
 
 .labelText {
-    font-size: 30px;
+    font-size: 28px;
     padding: 0px 10px;
 }
 
@@ -283,6 +283,19 @@ input:checked+label{
     left: -3em;
 }
 
+#sephiraButton{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40em;
+    height: 4em;
+    border-radius: 1em;
+    color: black;
+    font-size: 2em;
+    font-weight: bold;
+    background-color: gold;
+}
+
 .panelTitle {
     top: 0;
     height: 6em;
@@ -300,7 +313,7 @@ input:checked+label{
     text-align: center;
 }
 
-#c-bossSummary {
+#bossSummary {
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
@@ -309,7 +322,7 @@ input:checked+label{
     margin:2em;
 }
 
-#bossSummary {
+#bossPortrait {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -335,6 +348,80 @@ input:checked+label{
 
 #text-Timer {
     margin: 0px auto;
+}
+
+#sephiraSummary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sephiraTitle {
+    scale: 150%; 
+    margin: 2em;
+}
+
+.sephiraSummaryRow {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 2em;
+}
+
+.sephiraStatBlock{
+    display: flex;
+    flex-direction: column;
+    width: 80px;
+    margin: 0px 4px;
+}
+
+.sephiraSpacer{
+    margin-right: 2em;
+}
+
+.sephiraBackgroundImage{
+    width: 80px;
+    height: 80px;
+    background: url("../img/icon/sephira/chestIconBackground.png") no-repeat center;
+    background-size: cover;
+    margin-bottom: 6px;
+}
+
+.sephiraIcon {
+    width: 60px;
+    height: 60px;
+    margin: 10px;
+}
+
+.sephiraCount{
+    background-color: rgba(88, 77, 186, 0.2);
+    font-size: 2em;
+    width: 100%;
+    border-radius: 6px;
+    text-align: center;
+    color: white;
+    margin: auto;
+}
+
+#sephiraSummaryStats {
+    width: auto;
+    justify-content: space-between;
+    width: 54em;
+}
+
+.sephiraSummaryStatsItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 2em;
+    color:white
+}
+
+.sephiraSummaryStatsTitle{
+    margin-right: 0.5em;
+}
+
+.sephiraSummaryStatsValue{
+    width: 4em;
 }
 
 #c-statsBlock {
