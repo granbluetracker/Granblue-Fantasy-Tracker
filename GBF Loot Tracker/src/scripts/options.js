@@ -1,4 +1,7 @@
 document.body.style.zoom = "55%";
+/*************************/
+/* Variable Declarations */
+/*************************/
 var selectedBoss = "Seofon";
 var dataPeriodIndex = 0;
 const dataPeriods = ["All", "Month", "Week", "Day", "Timer"];
@@ -33,6 +36,14 @@ const redCountText = document.getElementById('text-redCountSummary');
 const dataPeriodText = document.getElementById('text-dataTypeSummary');
 const timerText = document.getElementById('text-Timer');
 
+
+// Stores the dom element for each sephira box count
+var sephiraBoxIcons = []
+sephiraBoxIcons.length = 27;
+for (let i = 1; i <= 26; i++){
+  sephiraBoxIcons[i] = document.getElementById('sep' + i + 'Count');
+}
+// Stores list of bosses and group titles. Used to populate the selected boss dropdown
 const validBosses = [
   "*Pre Bar Grind", "05Proto Bahamut", "06Ultimate Bahamut", "04Grand Order",
   "*Bar Grind", "16Ultimate Bahamut HL", "14Akasha", "16Grand Order HL", "15Proto Bahamut HL",
@@ -50,29 +61,24 @@ const validBosses = [
   "*Replicard Sandbox M", "00Zone Mundus Fire", "01Zone Mundus Water", "02Zone Mundus Earth", "03Zone Mundus Wind", "04Zone Mundus Light", "05Zone Mundus Dark",
   "*Replicard Sandbox M Bosses", "00Prometheus Militis", "01Ca Ong Militis", "02Gilgamesh Militis", "03Morrigna Militis", "06The World (Solo)",
 ];
-
-var sephiraBoxIcons = []
-sephiraBoxIcons.length = 27;
-for (let i = 1; i <= 26; i++){
-  sephiraBoxIcons[i] = document.getElementById('sep' + i + 'Count');
-}
-
+// Cleans the valid boss list of element/lucky loot data and removes group titles
 var tempValidBossesStripped = [];
 for (item of validBosses){
   if (!item.startsWith("*")){tempValidBossesStripped.push(item.substring(2));}
 }
 const validBossesStripped = tempValidBossesStripped;
 delete tempValidBossesStripped;
-
+// Context for the element id colors. 
 const elementColors = [
   "#bf371a", "#357ed4", "#855327", "#4b962a", "#d4b62b", "#7b49ca", "#696969", 
 "linear-gradient(135deg, rgba(212,182,43,1) 0%, rgba(123,73,202,1) 100%)", // Huanglong and Qilin
 "linear-gradient(135deg, #bf371a, #357ed4, #855327, #4b962a, #d4b62b, #7b49ca)", // Hexachromatic Hierarch
 "linear-gradient(135deg, #bf371a, #357ed4, #855327, #4b962a)",
-
 ];
 
+// Replacement image when an image wasn't found
 const fallbackLootImage = "url(./img/loot/default.jpg)"
+// Ids that get placed in the lucky loot section
 const luckyLootIds = [
 /*Red ring + Sand + Gold Bar + Evolite*/"emp3", "215", "20004", "25036",
 /*Gifts+Coffers*/"box2", "box3", "box4", "box5",
@@ -114,7 +120,7 @@ async function populateLoot(bossData){
   // Updates boss title text
   bossText.innerHTML = selectedBoss;
   // Sets the boss image and uses default if not found
-  selectedBossEscaped = selectedBoss.replace(/ /g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
+  let selectedBossEscaped = selectedBoss.replace(/ /g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
   var imagePath = "url(./img/portrait/" + selectedBossEscaped + ".png)";
   bossPortrait.style.backgroundImage=imagePath + ", " + fallbackLootImage;
   // If no boss data was specified, defaults to selectedBoss
@@ -126,7 +132,7 @@ async function populateLoot(bossData){
     console.log("%cBoss Data: ", "color:aqua;", [bossData]);
     // Initializes boss's stat counters in module
     // Recalculates if data period is set to monthly, weekly, or daily
-    if (dataPeriodIndex > 0){bossData = await recalculateData(bossData);}
+    if (dataPeriodIndex > 0){bossData = await recalculateData(selectedBoss, bossData);}
     bossData = bossData[dataPeriodIndex];
     killCountText.innerHTML = bossData.kills;
     blueCountText.innerHTML = bossData.blueChest;
@@ -146,7 +152,7 @@ async function populateLoot(bossData){
 
 // Loops through passed items and adds them to the screen
 async function UpdateLoot(items){
-  for(key in items){
+  for(let key in items){
     // Updates count for each lootbox on screen and creates one if it does not exist yet
     if (document.getElementById("text-" + key) === null) { // Element is not on screen
       generateLootBox(key, items[key]);
@@ -199,27 +205,28 @@ function generateLootBox(key, value){
 }
 
 // recalculates row to only include data from last month/week/day/custom
-async function recalculateData(bossData){
+async function recalculateData(bossName, bossData){
   // Safe mode:
   // targetRow = Object.assign({}, bossData[0]);
   // targetItemList = Object.assign({}, targetRow.itemList);
-  targetRow = bossData[dataPeriodIndex];
-  targetItemList = targetRow.itemList;
-  console.log("Boss Table: ", bossData);
-  console.log("Target Row: ", targetRow);
-  console.log("Target Item List: ", targetItemList);
+  let targetRow = bossData[dataPeriodIndex];
+  let targetItemList = targetRow.itemList;
+  console.log("%c[Recalculate Data]Boss Table: ", "color:#AC87C5", bossData);
+  console.log("%c[Recalculate Data]Target Row: ", "color:#AC87C5", targetRow);
+  console.log("%c[Recalculate Data]Target Item List: ", "color:#AC87C5", targetItemList);
   // Error checks index of 0
-  if (targetRow.lastIndex == 0){index = 5;}
-  else {index = targetRow.lastIndex;}
+  if (targetRow.lastIndex == 0){var index = 5;}
+  else {var index = targetRow.lastIndex;}
 
   // only kills with an epoch time after this are counted
-  if (dataPeriodIndex == 4){cutoffTime = timerStart}
-  else {cutoffTime = Date.now() - dataPeriodLengths[dataPeriodIndex];}
-  console.log("cutoffTime: " + cutoffTime);
-  tableSize = bossData.length;
+  // Cutoff time would be exactly a day/week/month ago, or at the start of the timer
+  if (dataPeriodIndex == 4){var cutoffTime = timerStart}
+  else {var cutoffTime = Date.now() - dataPeriodLengths[dataPeriodIndex];}
+  console.log("%c[Recalculate Data]cutoffTime: " + cutoffTime, "color:#AC87C5");
+  let tableSize = bossData.length;
   // Checks if any recalculating even needs to be done
   if (bossData[dataPeriodIndex].kills == 0 || index == tableSize || bossData[index].epochTime > cutoffTime){
-    console.log("Data didn't need to be rebalanced");
+    console.log("%c[Recalculate Data]Data didn't need to be rebalanced", "color:#AC87C5");
     return bossData;
   }
 
@@ -233,13 +240,13 @@ async function recalculateData(bossData){
     targetRow.lastIndex = index;
   }
   // Clears all items from the list that have a value of 0;
-  for (key in targetItemList){if (targetItemList[key] == 0){delete targetItemList[key];}}
+  for (let key in targetItemList){if (targetItemList[key] == 0){delete targetItemList[key];}}
   targetRow.itemList = targetItemList;
   bossData[dataPeriodIndex] = targetRow;
   // Sets lock so that the storage listener doesn't update loot on module
   isBalancingLoot = true;
   // Puts recalculated row back in storage
-  await saveObjectInLocalStorage({[selectedBoss] : bossData});
+  await saveObjectInLocalStorage({[bossName] : bossData});
   // Lifts lock
   isBalancingLoot = false;
   return bossData;
@@ -247,11 +254,11 @@ async function recalculateData(bossData){
 
 // Populates boss dropdown list with all valid bosses
 function populateDropdowns() {
-  for (i in validBosses){
+  for (let i in validBosses){
     // Initializes variables for the radio entry
-    itemType = validBosses[i].substring(0,1);
-    element = +validBosses[i].substring(1,2);
-    entryName = validBosses[i].substring(2);
+    let itemType = validBosses[i].substring(0,1);
+    let element = +validBosses[i].substring(1,2);
+    let entryName = validBosses[i].substring(2);
     // Adds group title
     if (itemType == "*"){
       var label = document.createElement("label");
@@ -280,16 +287,16 @@ function populateDropdowns() {
       labelText.classList.add("labelText");
       labelText.innerHTML = entryName;
       // Adds boss icon container
-      cIcon = document.createElement("div");
+      let cIcon = document.createElement("div");
       cIcon.classList.add("c-radioIcon");
       cIcon.style.background=elementColors[element];
       // Adds boss icon and potential loot icon
-      bossIcon = document.createElement("img");
+      let bossIcon = document.createElement("img");
       bossIcon.src = "./img/icon/boss/" + entryName.replace(/ /g, "%20") + ".jpg";
       bossIcon.classList.add("bossIcon");
       label.appendChild(labelText);
       if (itemType != "0"){ // Enemy has luckyloot to display next to name in dropdown
-        lootIcon = document.createElement("img");
+        let lootIcon = document.createElement("img");
         lootIcon.src = "./img/icon/boss/" + itemType + ".jpg";
         lootIcon.classList.add("bossIcon");
         cIcon.appendChild(lootIcon);
@@ -300,7 +307,7 @@ function populateDropdowns() {
     }
   }
   // Logic for the data period dropdown
-  checkedRadio = document.getElementById("dataPeriod" + dataPeriods[dataPeriodIndex]);
+  let checkedRadio = document.getElementById("dataPeriod" + dataPeriods[dataPeriodIndex]);
   checkedRadio.checked = true;
   dataPeriodText.innerHTML = dataPeriods[dataPeriodIndex];
   if (dataPeriodIndex == 4){toggleTimer(true);}
@@ -311,20 +318,28 @@ chrome.storage.onChanged.addListener((changes, areaname) => {
   try{
     var bossName = Object.keys(changes)[0];
     if (!validBossesStripped.includes(bossName) || isBalancingLoot) {return;}
-    if (selectedBoss != bossName){
+    let isBossNew = (selectedBoss != bossName);
+    // Turns off sephira mode if it was on so new loot can be loaded
+    if(!sephiraSummary.classList.contains("hidden")) {
+      clearSephiraMode();
+      console.log("Sephira mode disabled. Loading new profile: " + bossName);
+      isBossNew = true; // Set to true so that the boss that just dropped loot has all loot loaded instead of just the last drop
+      // This has to be done because the loot display was previously cleared by sephira mode opening
+    }
+    if (isBossNew){
       // Sets current boss to the newly detected one and cleares loot from DOM
       selectedBoss = bossName;
       cLoot.innerHTML = "";
       lLoot.innerHTML = "";
       luckyTitle.classList.add("hidden");
       // Sends null so that new boss is initialized
-      lastBattle = null;
+      var lastBattle = null;
     }
     else {
       // Gets the latest updated data for the boss
-      bossData = changes[bossName].newValue;
+      let bossData = changes[bossName].newValue;
       // Strips the data to only include the last fight
-      lastBattle = bossData[bossData.length-1];
+      var lastBattle = bossData[bossData.length-1];
     }
     populateLoot(lastBattle); // updates loot module in the DOM
   }
@@ -334,6 +349,7 @@ chrome.storage.onChanged.addListener((changes, areaname) => {
 // Updates current boss when dropdown is changed
 bossRadio.addEventListener('change', function (e) {
   selectedBoss = e.target.value;
+  if(!sephiraSummary.classList.contains("hidden")) {clearSephiraMode();}
   updateSettings("selectedBoss", selectedBoss);
   console.log("Selected boss changed to: " + selectedBoss);
   clearLootModule()
@@ -343,6 +359,7 @@ bossRadio.addEventListener('change', function (e) {
 
 dataPeriodRadio.addEventListener('change', async function (e) {
   dataPeriodIndex = +e.target.value;
+  if(!sephiraSummary.classList.contains("hidden")) {clearSephiraMode();}
   await updateSettings("dataPeriod", dataPeriodIndex);
   if (dataPeriodIndex == 4){
     timerStart = Date.now()
@@ -377,15 +394,15 @@ async function toggleTimer(state) {
 }
 // Updates the timer once a second when active
 function updateTimer(){
-  deltaTime = Date.now() - timerStart;
-  seconds = Math.floor(deltaTime/1000) % 60;
-  minutes = Math.floor(deltaTime/60000) % 60;
-  hours = Math.floor(deltaTime/3600000) % 24;
-  days = Math.floor(deltaTime/86400000);
-  displayArr = [days, hours, minutes, seconds];
-  startDisplay = false;
-  display = "";
-  for (i in displayArr){
+  let deltaTime = Date.now() - timerStart;
+  let seconds = Math.floor(deltaTime/1000) % 60;
+  let minutes = Math.floor(deltaTime/60000) % 60;
+  let hours = Math.floor(deltaTime/3600000) % 24;
+  let days = Math.floor(deltaTime/86400000);
+  let displayArr = [days, hours, minutes, seconds];
+  let startDisplay = false;
+  let display = "";
+  for (let i in displayArr){
     if (displayArr[i] != 0 || startDisplay){
       // Add leading 0
       if (i != 0 && displayArr[i] < 10 && startDisplay == true){display += "0"}
@@ -421,26 +438,37 @@ function modifyPanel(targetName){
   }
 }
 
-sephiraButton.addEventListener('click', function(e) {
-  modifyPanel("loot");
-  clearLootModule();
+sephiraButton.addEventListener('click', function(){
+  modifyPanel("loot"); // Closes loot panel
+  toggleSephiraMode()
+});
+
+async function toggleSephiraMode(){
+  await clearLootModule(); // Clears whatever loot was being displayed
+  // Enable sephira box
   if (sephiraSummary.classList.contains("hidden")){
+    console.log("Enabling sephira mode");
     sephiraSummary.classList.remove("hidden");
     bossSummary.classList.add("hidden");
     bossText.innerHTML ="Sephira Data";
     UpdateSephiraData();
   }
+  // Disable sephira box
   else {
+    console.log("Disabling sephira mode");
     sephiraSummary.classList.add("hidden");
     bossSummary.classList.remove("hidden");
     populateLoot(null);
   }
-})
+}
 
 async function UpdateSephiraData(){
+  // Recalculates what loot is within current period
   if (dataPeriodIndex != 0){
-    await recalculateData("Sephira Boxes");
-    await recalculateData("Sephira Drops");
+    let tempSephiraBoxData = await getObjectFromLocalStorage("Sephira Boxes");
+    await recalculateData("Sephira Boxes", tempSephiraBoxData);
+    let tempSephiraDropData = await getObjectFromLocalStorage("Sephira Drops");
+    await recalculateData("Sephira Drops", tempSephiraDropData);
   }
   var stockData = await getObjectFromLocalStorage("Sephira Boxes");
   sephiraChestCount.innerHTML = stockData[dataPeriodIndex].kills;
@@ -455,13 +483,19 @@ async function UpdateSephiraData(){
 }
 
 // Resets the html for the loot display
-function clearLootModule(){
+async function clearLootModule(){
   killCountText.innerHTML = 0;
   blueCountText.innerHTML = 0;
   redCountText.innerHTML = 0;
   cLoot.innerHTML = "";
   lLoot.innerHTML = "";
   luckyTitle.classList.add("hidden");
+}
+
+function clearSephiraMode(){
+  console.log("Disabling sephira mode");
+  sephiraSummary.classList.add("hidden");
+  bossSummary.classList.remove("hidden");
 }
 
 // Togles the panel element passed to open or closed
@@ -597,8 +631,9 @@ async function fixCode(){
 }
 
 // Counts all fights from the selectedBoss to retally the total in index 0 of the drop table
-async function recountSelectedBoss(){
-  bossTable = await getObjectFromLocalStorage(selectedBoss);
+async function recountSelectedBoss(selectedKey){
+  if (null == selectedKey){selectedKey = selectedBoss}
+  bossTable = await getObjectFromLocalStorage(selectedKey);
   // Removes old properties from old versions
   legacyProperties = ["lootList", "epochTime"]
   for (let property in legacyProperties){
@@ -624,7 +659,7 @@ async function recountSelectedBoss(){
   for (var i = 1; i <= 4; i++){bossTable[i] = bossTable[0];}
   
   console.log("After operation: ", bossTable);
-  await saveObjectInLocalStorage({[selectedBoss]: bossTable})
+  await saveObjectInLocalStorage({[selectedKey]: bossTable})
 }
 
 // Updates the setting with the name type and stores the value
@@ -636,7 +671,8 @@ async function updateSettings(type, value){
     settings = {
       "dataPeriod" : 0,
       "selectedBoss" : "Proto Bahamut",
-      "timerStart" : 0
+      "timerStart" : 0,
+      "timeCheckedLastVersion" : 0
     }
     await saveObjectInLocalStorage({["Settings"]: settings});
   }
@@ -659,7 +695,8 @@ async function resetSettings(){
   settingsDefault = {
     "dataPeriod" : 0,
     "selectedBoss" : "Proto Bahamut",
-    "timerStart" : 0
+    "timerStart" : 0,
+    "timeCheckedLastVersion" : 0
   }
   await saveObjectInLocalStorage({["Settings"]: settings});
   return new Promise((resolve, reject) => {resolve()});

@@ -7,10 +7,12 @@
     <link rel="icon" href="img/favcon.png">
     <link rel="stylesheet" href="styles/options.css" />
     <script async src="scripts/options.js"></script>
+    <script async src="scripts/storage_in_out.js"></script>
+    <script async src="scripts/populateHeader.js"></script>
   </head>
   <body>
     <header>
-      <div id="header"><h1>Granblue Fantasy Loot Tracker Module v1.0.5</h1></div>
+      <div id="header">Granblue Fantasy Loot Tracker Module<span id="headerVersion"></span></div>
     </header>
 
     <div id="body">
@@ -24,6 +26,17 @@
               <div id="lootPanelBody" class="panelBody">
                 <div class="panelItem">
                   <div id="sephiraButton">View Sephira Box Data</div>
+                </div>
+                <div class="panelItem">
+                  <input type="file" id="restoreData" name="restoreData" accept=".json" style="display:none;">
+                  <label for="restoreData" id="restoreDataButton" class="transferDataButton">
+                    <img class="lootSettingIcon" src="../src/img/icon/export.png">
+                    Restore data
+                  </label>
+                  <div id="downloadDataButton" class="transferDataButton">
+                    <img class="lootSettingIcon" src="../src/img/icon/import.png">
+                    Download data
+                  </div>
                 </div>
               </div>            
             </div>

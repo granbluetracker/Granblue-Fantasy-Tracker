@@ -5,9 +5,11 @@ div#header {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: none;
-    height: 10em;
+    height: 6em;
+    font-size: 2em;
+    font-weight: bold;
 }
+
 p {
     margin: 0px;
 }
@@ -135,7 +137,7 @@ div
 }
 
 #lootButton{
-    background: url("../img/icon.png") no-repeat center;
+    background: url("../img/icon/loot.png") no-repeat center;
     background-size: cover;
 }
 
@@ -284,16 +286,49 @@ input:checked+label{
 }
 
 #sephiraButton{
+    border-color: #9299af;
+    color: white;
+    background-color: #16162c;
+    border-radius: 5px;
+    border-width: 2px;
+    border-style: solid;
+    width: 100%;
+    height: 4em;
+    margin-top: 1em;
+    font-size: 2em;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40em;
-    height: 4em;
-    border-radius: 1em;
-    color: black;
+}
+
+.transferDataButton{
+    pointer-events: initial;
+    border-color: #9299af;
+    color: white;
+    background-color: #16162c;
+    border-radius: 5px;
+    border-width: 2px;
+    border-style: solid;
+    width: 48%;
+    min-height: 4em;
+    margin-top: 1em;
     font-size: 2em;
     font-weight: bold;
-    background-color: gold;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    position: relative;
+}
+.transferDataButton:hover{
+    background-color: #292947;
+}
+
+.lootSettingIcon{
+    width: 64px;
+    height: 64px;
+    margin-left: 24px;
+    margin-right: 24px;
 }
 
 .panelTitle {

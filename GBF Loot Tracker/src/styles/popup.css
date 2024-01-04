@@ -18,7 +18,7 @@ body {
 }
 
 a {
-    font-size: x-large;
+    font-size: large;
     margin: auto;
     text-decoration: none;
     color: white;
@@ -28,4 +28,11 @@ a {
 a:hover {
     color: #88aeb7;
     transition: all 400ms ease-in-out;
+}
+
+#updateLink {
+    color: red;
+}
+#updateLink:hover {
+    color: firebrick;
 }

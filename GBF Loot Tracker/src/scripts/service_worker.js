@@ -25,13 +25,9 @@ const sephiraStockRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/
 const sephiraOpenRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/open_sephirabox\\?_="); // File showing items from opening chests 
 
 var trackedRequest = []; // Tracks the last loot file info
-var trackedFileLookup = [ // Unused for now, will come into play when arcarum and more free quest support gets added
-  {
-    "FileNameRegex" : raidRewardUrlRegex,
-    "RequiredLocation" : raidResultUrlRegex
-  }
-];
 var activeDebuggers = []; // Stores an up to date list of every debugger attached to a tab
+const changeIconOnId = ["215", "20004"]; // If loot with these IDs are dropped, changes the extension icon
+const iconChangeDuration = 300000; // How long the extension icon stays changed after a lucky drop. 300,000 ms = 5 minutes
 
 /**********************************/
 /* Listener and support functions */
@@ -209,9 +205,11 @@ async function ProcessRewardJSON(response){
     console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
     // Build row to send
     var tableEntry = BuildTableEntry(body);
+    // Temporarily changes extension icon if loot contained any special items (sand/bars)
+    Object.keys(tableEntry.itemList).some(r => (changeIconOnId.includes(r) && setIconAction(r)))
     // Finds the enemy name
     var enemyName = FindEnemyName(tableEntry.itemList, body.quest_type, body.url)
-    if (enemyName == "Unknown"){console.log("%c[!]Enemy was unknown", "color:orange;"); return;}
+    if (enemyName == "Unknown" || enemyName == undefined){console.log("%c[!]Enemy was " + enemyName, "color:orange;"); return;}
     console.log("%c[2.5]Enemy name found: " + enemyName, "color:cornflowerblue;");
     StoreRow(enemyName, tableEntry);
   }
@@ -243,6 +241,12 @@ function BuildTableEntry(body){
           break;
         case 88:
           var itemType = "bonus";
+          break;
+        case 91:
+          var itemType = "shld";
+          break;
+        case 93:
+          var itemType = "mntr";
           break;
         default:
           var itemType = "";
@@ -503,6 +507,49 @@ function ProcessSephiraJSON(response){
   catch(error){console.log("%c[error]An error occured in ProcessSephiraJSON: ", "color:red;", error);}
 }
 
+async function CheckForUpdate(){
+  let settings = await getObjectFromLocalStorage("Settings");
+  if (settings == undefined){console.log("Settings were never initialized"); return;} // Settings weren't ever initialized
+  if (!settings.hasOwnProperty("timeCheckedLastVersion")){ // Settings were initialized, but it was before this feature
+    settings.timeCheckedLastVersion = Date.now();
+    await saveObjectInLocalStorage({["Settings"]:settings});
+  }
+  else if (settings.timeCheckedLastVersion > Date.now() - 600000) {console.log("Game has already checked for update in the last 10 minutes"); return;} // Game checked in last 10 minutes
+  settings.timeCheckedLastVersion = Date.now();
+  console.log("Last time checked updated to: " + settings.timeCheckedLastVersion);
+  await saveObjectInLocalStorage({["Settings"]:settings}); // Updates the last time that an update was checked
+  const apiUrl = 'https://api.github.com/repos/granbluetracker/Granblue-Fantasy-Tracker/releases/latest';
+  const options = {
+    "method": "GET",
+    "header": {
+    "User-Agent": "Granblue-Fantasy-Tracker",
+    "Accept": "application/vnd.github+json",
+    "X-Github-Api-Version": "2022-11-28",
+    }
+  }
+  // Make a request to the GitHub Releases API
+  fetch(apiUrl, options)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch latest release: ", response.status, response.statusText);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(data);
+      let latestVersion = data.tag_name;
+      latestVersion = latestVersion.substring(1); // Removes the v from the start of the version
+      console.log("Latest release version: " + latestVersion);
+      if (settings.hasOwnProperty("latestVersion") && settings.latestVersion == latestVersion ){console.log("Latest version was already known"); return;} // Latest version was already known
+      settings.latestVersion = latestVersion;
+      console.log("Latest version was updated!");
+      saveObjectInLocalStorage({["Settings"]:settings}); // Latest version saved to settings
+    })
+    .catch(error => {
+      console.error('Error:', error.message);
+    });
+}
+
 /*****************************************/
 /* Functions to help debug the extension */
 /*****************************************/
@@ -513,6 +560,26 @@ function printActiveDebuggers(printAll) {
     if (printAll){result = result.filter(function(e){return e.attached==true})}
     console.log(result);
   });
+}
+
+// Stores the timeout to revert the extension icon
+var setIconActionTimeout;
+// Changes the extension icon to any lucky drop you may get
+function setIconAction(iconId){
+  if (iconId == "reset"){var imagePath = "/src/img/icon.png"}
+  else{
+    if (!changeIconOnId.includes(iconId)){console.log("%c[error]Invalid ID for extension icon: " + iconId, "color:red;");return;};
+    var imagePath = "/src/img/icon/luckyIcons/" + iconId + ".jpg"
+    // Resets the extension icon to default after iconChangeDuration (ms). Default is 300,000ms = 5 minutes
+    setIconActionTimeout = setTimeout(setIconAction, iconChangeDuration, "reset")
+  }
+  chrome.action.setIcon({
+    path: {
+      "16": imagePath,
+      "48": imagePath,
+      "128": imagePath
+    }
+  }).then(console.log("%c[+]Extension icon changed to: " + imagePath, "color:#AFC8AD;"));
 }
 
 /*********************************/
@@ -559,3 +626,5 @@ const saveObjectInLocalStorage = async function(obj) {
     }
   });
 };
+
+CheckForUpdate();
