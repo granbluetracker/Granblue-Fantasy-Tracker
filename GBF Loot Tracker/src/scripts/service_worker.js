@@ -7,6 +7,7 @@ console.log(`%c[v${currentVersion}]Service worker has started...`, "color:cyan;"
 
 
 const gameUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp");
+const extensionUrlRegex = new RegExp("^chrome:\/\/extensions\/|^chrome-extension:\/\/")
 
 const soloResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result\/\\d{10}"); // Regex for a url on the solo fight result page
 const raidResultUrlRegex = new RegExp("^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}"); // Regex for a url on the raid result page
@@ -50,8 +51,9 @@ if (!chrome.tabs.onUpdated.hasListener(TabListener)){
 
 // Dynamically adds/removes debugger when a tab enter/leaves granblue fantasy
 function TabListener(tabId, changeInfo, tab){
+  if (extensionUrlRegex.test(tab.url) && (changeInfo.status === "loading")){RefreshActiveDebuggers(); return;}
   // Excludes tabs that aren't loading or are chrome extension pages
-  if (!(changeInfo.status === "loading") || tab.url.startsWith("chrome-extension://")){return;}
+  if (!(changeInfo.status === "loading")){return;}
   let isOnGame = gameUrlRegex.test(tab.url);
   let hasDebuggerAttached = activeDebuggers.some(item => item.tabId == tabId);
   if (isOnGame && !hasDebuggerAttached) {
@@ -71,28 +73,7 @@ function AddDebugger(tabId) {
   }
   catch(error){
     console.log("%c[error]Results tab already has a debugger attached...", "color:red;", error);
-  }
-}
-
-// Enables network events on debugged tab. These events are listened to by the NetworkListener() function
-function onAttach(tabId) {
-  try{
-    console.log("%c[+]New debugger added to: " + tabId, "color:lime;");
-    chrome.debugger.sendCommand({ 
-      "tabId": tabId
-    }, "Network.enable");
-    console.log("%c[+]Network Enabled. Waiting for response", "color:lime;");
-    chrome.debugger.getTargets(async function (result){
-      activeDebuggers = result.filter(function(e){return e.attached==true})
-      console.log("%c[info]Active debuggers updated: ", "color:aqua;", activeDebuggers);
-    })
-  }
-  catch(error){
-    console.log("An error occured at onAttach...", error);
-    chrome.debugger.getTargets(async function (result){
-      activeDebuggers = result.filter(function(e){return e.attached==true})
-      console.log("%c[info]Active debuggers updated: ", "color:aqua;", activeDebuggers);
-    })
+    RefreshActiveDebuggers();
   }
 }
 
@@ -106,13 +87,37 @@ async function RemoveDebugger(debuggeeId){
       requestLog = [];
       requestLogAll = [];
       await chrome.debugger.detach(debuggeeId);
-      await chrome.debugger.getTargets(function (result){
-        activeDebuggers = result.filter(function(e){return e.attached==true})
-        console.log("%c[info]Active debuggers updated: ", "color:aqua;", activeDebuggers);
-      });
+      await RefreshActiveDebuggers();
     }
+    else{console.log("%c[-]Debugger wasn't attached: ", "color:red;", debuggeeId);}
   }
-  catch(error){console.log("%c[error]Debugger was already detatched... ", "color:red;", error)}
+  catch(error){
+    console.log("%c[error]Debugger was already detatched... ", "color:red;", error)
+    RefreshActiveDebuggers();
+  }
+}
+
+async function RefreshActiveDebuggers(){
+  chrome.debugger.getTargets(async function (result){
+    activeDebuggers = result.filter(function(e){return e.attached==true})
+    console.log("%c[info]Active debuggers Refreshed: ", "color:aqua;", activeDebuggers);
+  })
+}
+
+// Enables network events on debugged tab. These events are listened to by the NetworkListener() function
+function onAttach(tabId) {
+  try{
+    console.log("%c[+]New debugger added to: " + tabId, "color:lime;");
+    chrome.debugger.sendCommand({ 
+      "tabId": tabId
+    }, "Network.enable");
+    console.log("%c[+]Network Enabled. Waiting for response", "color:lime;");
+    RefreshActiveDebuggers();
+  }
+  catch(error){
+    console.log("An error occured at onAttach...", error);
+    RefreshActiveDebuggers();
+  }
 }
 
 /************************************************************************/
