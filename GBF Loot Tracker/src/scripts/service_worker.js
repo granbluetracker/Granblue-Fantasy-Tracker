@@ -321,7 +321,8 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Ewiyar" : [[],["560"],[],["592"]],
         "Lu Woh" : [[],["561"],[],["592"]],
         "Fediel" : [[],["562"],[],["592"]],
-        "Hexachromatic Hierarch" : [["592"],["562"],[],[]],
+        "Hexachromatic Hierarch" : [["592"],[],[],[]],
+        "Dark Rapture Zero" : [["593"],[],[],[]],
         "Mugen" : [["586"],[],[],[]],
         "Diaspora" : [["585"],[],[],[]],
         "Siegfried" : [["587"],[],[],[]],
@@ -332,6 +333,8 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Huanglong" : [["206"],[],[],["528", "529", "530", "531"]],
         "Qilin" : [["208"],[],[],["528", "529", "530", "531"]],
         "The World" : [["25017"],[],[],[]],
+        "Tiamat Aura Omega" : [["600", "601", "1040119200", "1040516800", "1040713400"],["612"],["10", "18", "44", "32", "104", "114", "5041"],[]],
+        "Luminiera Credo Omega" : [["608", "609", "1040219100", "1040516900", "1040916200"],["612"],["25", "26", "45", "50", "105", "115", "5051"],[]],
       }
       for (let boss in lootSignature){
         // If there is an instant field, you can decide if it is the right boss instantly

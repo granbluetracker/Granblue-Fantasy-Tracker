@@ -50,8 +50,9 @@ const validBosses = [
   "*Uncap Grind", "06Lindwurm", "09The Four Primarchs", "06Lucilius", "06Lucilius (Hard)", "06Beelzebub", "06Belial", "26The World",
   "*Ennead Raids", "20Atum", "21Tefnut", "22Bennu", "23Ra", "24Horus", "25Osiris",
   "*Six Dragons", "20Wilnas", "21Wamdus", "22Galleon", "23Ewiyar", "24Lu Woh", "25Fediel",
+  "*Magna 3", "23Tiamat Aura Omega", "24Luminiera Credo Omega",
   "*Revans", "20Mugen", "21Diaspora", "22Siegfried", "23Seofon", "24Cosmos", "25Agastia",
-  "*High Difficulty", "06Super Ultimate Bahamut", "08Hexachromatic Hierarch",
+  "*High Difficulty", "26Super Ultimate Bahamut", "28Hexachromatic Hierarch", "26Dark Rapture Zero",
   "*Rise of the Beasts", "17Huanglong and Qilin", "14Huanglong", "15Qilin",
   "*Replicard Sandbox E-H", "00Zone Eletio", "01Zone Faym", "02Zone Goliath", "03Zone Harbinger",
   "*Replicard Sandbox I-L", "00Zone Invidia Fire", "04Zone Invidia Light", "01Zone Joculator Water", "05Zone Joculator Dark", 
@@ -95,6 +96,7 @@ const luckyLootIds = [
 /*Militis Weapons*/"1040022600", "1040216800", "1040914300", "1040615700", "1040711400", "1040421200",
 "1040515000", "1040314600", "1040814900", "1040115400", "1040711500", "1040616900",
 "1040814000", "1040515100", "1040024100", "1040314700", "1040419600", "1040218000",
+/*Magna3 Weapons*/"1040119200", "1040516800", "1040713400", "1040219100", "1040516900", "1040916200",
 ];
 
 const skillItemIds = ["1029900000", "1039900000"];
