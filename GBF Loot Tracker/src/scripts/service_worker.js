@@ -206,7 +206,7 @@ async function ProcessRewardJSON(response){
       return;
     }
     var body = body.option.result_data;
-    console.log("%c[debug]Result data: ", "color:cornflowerblue;", body);
+    console.log("%c[2.1]Result data: ", "color:cornflowerblue;", body);
     // var rewardList = body.rewards.reward_list;
     // console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
     // Build row to send
@@ -397,7 +397,7 @@ function FindEnemyName(lootListRaw, battleType, returnUrl){
       if (lootList.includes("90001")){
         console.log("Was RotB");
         let difficulty = "Extreme";
-        if (lootListRaw["90001"] >= 200){difficulty = "Extreme+"}
+        if (lootListRaw["90001"] > 210){difficulty = "Extreme+"}
         console.log("Difficulty was: " + difficulty)
         for (let boss in RotBSignature){
           if (RotBSignature[boss][0] == difficulty && lootList.includes(RotBSignature[boss][1])){

@@ -577,6 +577,22 @@ const saveObjectInLocalStorage = async function(obj) {
   });
 }
 
+/**
+ * Removes Object from Chrome Local StorageArea.
+ *
+ * @param {string or array of string keys} keys
+ */
+const removeObjectFromLocalStorage = async function(keys) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.local.remove(keys, function() {
+        resolve();
+      });
+    } catch (ex) {
+      reject(ex);
+    }
+  });
+};
 /***********************/
 /* DEBUGGING FUNCTIONS */
 /***********************/
