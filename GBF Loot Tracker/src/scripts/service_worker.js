@@ -206,8 +206,9 @@ async function ProcessRewardJSON(response){
       return;
     }
     var body = body.option.result_data;
-    var rewardList = body.rewards.reward_list;
-    console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
+    console.log("%c[debug]Result data: ", "color:cornflowerblue;", body);
+    // var rewardList = body.rewards.reward_list;
+    // console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
     // Build row to send
     var tableEntry = BuildTableEntry(body);
     // Temporarily changes extension icon if loot contained any special items (sand/bars)
@@ -235,23 +236,52 @@ function BuildTableEntry(body){
       var itemCount = item.count;
       // adds prefix to items that need one
       switch(item.item_kind){
-        case 4:
+        case 4: // Stamina / berries
           var itemType = "stam";
           break;
-        case 55:
+        case 10: // Normal items that go in your item inventory (usually)
+          var itemType = "";
+          break;
+        case 55: // Ticket items like gold gifts or astra boxes
           var itemType = "box";
           break;
-        case 73:
+        case 73: // Rings + Earrings
           var itemType = "emp";
           break;
-        case 88:
+        case 88: // Plus Marks
           var itemType = "bonus";
           break;
-        case 91:
+        case 91: // Paladin Shields
           var itemType = "shld";
           break;
-        case 93:
+        case 93: // Manadiver pets
           var itemType = "mntr";
+          break;
+        // RISE OF THE BEAST ITEMS
+        case 26: // Water RotB badge
+          var itemType = "badge";
+          item.id = "1"
+          break;
+        case 27: // Wind RotB badge
+          var itemType = "badge";
+          item.id = "2"
+          break;
+        case 28: // Earth RotB badge
+          var itemType = "badge";
+          item.id = "3"
+          break;
+        case 63: // Fire RotB badge
+          var itemType = "badge";
+          item.id = "4"
+          break;
+        case 85: // Golden RotB badge
+          var itemType = "badge";
+          item.id = "5"
+          break;
+        case 49: // RotB four symbols pendants (Low drop number that has it's own type)
+          var itemType = "";
+          itemCount = item.id;
+          item.id = "90001"
           break;
         default:
           var itemType = "";
@@ -283,10 +313,11 @@ function BuildTableEntry(body){
 }
 
 // Finds the name of the enemy by determining which can produce the data captured in step 1
-function FindEnemyName(lootList, battleType, returnUrl){
+function FindEnemyName(lootListRaw, battleType, returnUrl){
+  console.log("DEBUG FROM FindEnemyName(): ", lootListRaw, battleType, returnUrl);
   console.log("%c[2.4]Finding enemy name", "color:cornflowerblue;");
   // Uses loot and the type of battle to determine which enemy it came from
-  var lootList = Object.keys(lootList);
+  var lootList = Object.keys(lootListRaw);
   switch(battleType){
     // 1 = raid, 25 = sandbox
     case 1:
@@ -321,7 +352,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Ewiyar" : [[],["560"],[],["592"]],
         "Lu Woh" : [[],["561"],[],["592"]],
         "Fediel" : [[],["562"],[],["592"]],
-        "Hexachromatic Hierarch" : [["592"],[],[],[]],
+        "Hexachromatic Hierarch" : [["592"],["562"],[],[]],
         "Dark Rapture Zero" : [["593"],[],[],[]],
         "Mugen" : [["586"],[],[],[]],
         "Diaspora" : [["585"],[],[],[]],
@@ -332,6 +363,7 @@ function FindEnemyName(lootList, battleType, returnUrl){
         "Huanglong and Qilin" : [["528", "529", "530", "531"],[],[],[]],
         "Huanglong" : [["206"],[],[],["528", "529", "530", "531"]],
         "Qilin" : [["208"],[],[],["528", "529", "530", "531"]],
+        "Shenxian":[["badge5"],[],[],[]],
         "The World" : [["25017"],[],[],[]],
         "Tiamat Aura Omega" : [[],["612"],["10", "18", "44", "32", "104", "114", "600", "601", "5041"],[]],
         "Luminiera Credo Omega" : [[],["612"],["25", "26", "45", "50", "105", "115", "608", "609", "5051"],[]],
@@ -345,7 +377,34 @@ function FindEnemyName(lootList, battleType, returnUrl){
         if (lootSignature[boss][1].length>0 && !lootSignature[boss][1].some(r=> lootList.includes(r))){continue;}
         if (lootSignature[boss][2].length>0 && !lootSignature[boss][2].some(r=> lootList.includes(r))){continue;}
         if (lootSignature[boss][3].length>0 && lootSignature[boss][3].some(r=> lootList.includes(r))){continue;}
+        console.log("Returning: " + boss);
         return boss;
+      }
+      // Difficulty: The fight is classified as this difficulty
+      // required: This item must be in the list
+      var RotBSignature = {
+        "Xuanwu" : ["Extreme","badge1"],
+        "Qinglong" : ["Extreme","badge2"],
+        "Baihu" : ["Extreme","badge3"],
+        "Zhuque" : ["Extreme","badge4"],
+        "Neptune" : ["Extreme+","badge1"],
+        "Zephyrus" : ["Extreme+","badge2"],
+        "Titan" : ["Extreme+","badge3"],
+        "Agni" : ["Extreme+","badge4"],
+      }
+      console.log("Checking if RotB");
+      // Checks RotB enemies
+      if (lootList.includes("90001")){
+        console.log("Was RotB");
+        let difficulty = "Extreme";
+        if (lootListRaw["90001"] >= 200){difficulty = "Extreme+"}
+        console.log("Difficulty was: " + difficulty)
+        for (let boss in RotBSignature){
+          if (RotBSignature[boss][0] == difficulty && lootList.includes(RotBSignature[boss][1])){
+            console.log("RotB boss was: " + boss);
+            return boss;
+          }
+        }
       }
       // Did not match any known loot signature
       return "Unknown";

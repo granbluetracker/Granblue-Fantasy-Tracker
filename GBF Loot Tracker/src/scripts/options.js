@@ -53,7 +53,9 @@ const validBosses = [
   "*Magna 3", "23Tiamat Aura Omega", "24Luminiera Credo Omega",
   "*Revans", "20Mugen", "21Diaspora", "22Siegfried", "23Seofon", "24Cosmos", "25Agastia",
   "*High Difficulty", "26Super Ultimate Bahamut", "28Hexachromatic Hierarch", "26Dark Rapture Zero",
-  "*Rise of the Beasts", "17Huanglong and Qilin", "14Huanglong", "15Qilin",
+  "*Rise of the Beasts", "00Zhuque", "00Agni", "01Xuanwu", "01Neptune", 
+  "02Baihu", "02Titan", "03Qinglong", "03Zephyrus",
+  "06Shenxian", "17Huanglong and Qilin", "14Huanglong", "15Qilin",
   "*Replicard Sandbox E-H", "00Zone Eletio", "01Zone Faym", "02Zone Goliath", "03Zone Harbinger",
   "*Replicard Sandbox I-L", "00Zone Invidia Fire", "04Zone Invidia Light", "01Zone Joculator Water", "05Zone Joculator Dark", 
   "02Zone Kalendae Earth", "05Zone Kalendae Dark", "03Zone Liber Wind", "05Zone Liber Light",
@@ -142,7 +144,7 @@ async function populateLoot(bossData){
   }
   else{
     // Updates boss's stat counter on the module
-    var bossStats = [killCountText.innerHTML, blueCountText.innerHTML, redCountText.innerHTML]
+    var bossStats = [killCountText.innerHTML, blueCountText.innerHTML, redCountText.innerHTML];
     killCountText.innerHTML = +bossStats[0] + 1;
     blueCountText.innerHTML = +bossStats[1] + +bossData.blueChest;
     redCountText.innerHTML = +bossStats[2] + +bossData.redChest;
@@ -185,7 +187,8 @@ function generateLootBox(key, value){
   // Creates container for item count text
   let cText = document.createElement('div');
   cText.setAttribute("class", "c-itemText");
-  if (+key > 1000000000){cText.classList.add("weaponText");}
+  // if (+key > 1000000000){cText.classList.add("weaponText");}
+  cText.classList.add("weaponText");
   // Creates item text
   let text = document.createElement('p');
   text.setAttribute("id", "text-" + key);
@@ -399,6 +402,8 @@ function updateTimer(){
   let deltaTime = Date.now() - timerStart;
   let seconds = Math.floor(deltaTime/1000) % 60;
   let minutes = Math.floor(deltaTime/60000) % 60;
+
+  
   let hours = Math.floor(deltaTime/3600000) % 24;
   let days = Math.floor(deltaTime/86400000);
   let displayArr = [days, hours, minutes, seconds];

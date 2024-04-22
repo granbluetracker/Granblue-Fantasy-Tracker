@@ -1,7 +1,7 @@
 {
   "name": "GBF Loot Tracker",
   "description": "Base Level Extension",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "manifest_version": 3,
   "options_page": "src/module.html",
 
