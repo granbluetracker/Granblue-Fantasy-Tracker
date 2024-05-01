@@ -50,7 +50,7 @@ const validBosses = [
   "*Uncap Grind", "06Lindwurm", "09The Four Primarchs", "06Lucilius", "06Lucilius (Hard)", "06Beelzebub", "06Belial", "26The World",
   "*Ennead Raids", "20Atum", "21Tefnut", "22Bennu", "23Ra", "24Horus", "25Osiris",
   "*Six Dragons", "20Wilnas", "21Wamdus", "22Galleon", "23Ewiyar", "24Lu Woh", "25Fediel",
-  "*Magna 3", "23Tiamat Aura Omega", "24Luminiera Credo Omega",
+  "*Magna 3", "20Colossus Ira Omega", "23Tiamat Aura Omega", "24Luminiera Credo Omega", "25Celeste Alter Omega",
   "*Revans", "20Mugen", "21Diaspora", "22Siegfried", "23Seofon", "24Cosmos", "25Agastia",
   "*High Difficulty", "26Super Ultimate Bahamut", "28Hexachromatic Hierarch", "26Dark Rapture Zero",
   "*Rise of the Beasts", "00Zhuque", "00Agni", "01Xuanwu", "01Neptune", 
@@ -99,6 +99,7 @@ const luckyLootIds = [
 "1040515000", "1040314600", "1040814900", "1040115400", "1040711500", "1040616900",
 "1040814000", "1040515100", "1040024100", "1040314700", "1040419600", "1040218000",
 /*Magna3 Weapons*/"1040119200", "1040516800", "1040713400", "1040219100", "1040516900", "1040916200",
+"1040026100", "1040317400", "1040423100", "1040119500", "1040618800", "1040916300", 
 ];
 
 const skillItemIds = ["1029900000", "1039900000"];

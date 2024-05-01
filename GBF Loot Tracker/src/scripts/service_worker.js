@@ -367,6 +367,9 @@ function FindEnemyName(lootListRaw, battleType, returnUrl){
         "The World" : [["25017"],[],[],[]],
         "Tiamat Aura Omega" : [[],["612"],["10", "18", "44", "32", "104", "114", "600", "601", "5041"],[]],
         "Luminiera Credo Omega" : [[],["612"],["25", "26", "45", "50", "105", "115", "608", "609", "5051"],[]],
+        "Colossus Ira Omega" : [[],["612"],["11", "19", "41", "47", "101", "111", "602", "603", "5011"],[]],
+        "Celeste Alter Omega" : [[],["612"],["30", "31", "46", "51", "106", "116", "610", "611", "5061"],[]],
+      
       }
       for (let boss in lootSignature){
         // If there is an instant field, you can decide if it is the right boss instantly
