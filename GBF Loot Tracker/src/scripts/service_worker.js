@@ -368,8 +368,9 @@ function FindEnemyName(lootListRaw, battleType, returnUrl){
         "Tiamat Aura Omega" : [[],["612"],["10", "18", "44", "32", "104", "114", "600", "601", "5041"],[]],
         "Luminiera Credo Omega" : [[],["612"],["25", "26", "45", "50", "105", "115", "608", "609", "5051"],[]],
         "Colossus Ira Omega" : [[],["612"],["11", "19", "41", "47", "101", "111", "602", "603", "5011"],[]],
-        "Celeste Alter Omega" : [[],["612"],["30", "31", "46", "51", "106", "116", "610", "611", "5061"],[]],
-      
+        "Celeste Ater Omega" : [[],["612"],["30", "31", "46", "51", "106", "116", "610", "611", "5061"],[]],
+        "Yggdrasil Arbos Omega": [[],["612"],["13", "21", "43", "49", "103", "113", "606", "607", "5031"],[]],
+        "Leviathan Mare Omega": [[],["612"],["12", "20", "42", "48", "102", "112", "604", "605", "5021"],[]],
       }
       for (let boss in lootSignature){
         // If there is an instant field, you can decide if it is the right boss instantly
