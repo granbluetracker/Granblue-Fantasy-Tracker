@@ -1,0 +1,148 @@
+/*Elements for the stage selector panel*/
+.stage-selector {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 5em;
+    width: 80%;
+    min-width: 28em;
+    max-width: 82em;
+    height: max-content;
+    min-height: 20em;
+    margin: 2em;
+    border-image: url(../img/background/moduleBackgroundEdited.png) 25 25 fill;
+    border-width: 1.5em;
+    border-style: solid;
+    z-index: 4;
+}
+
+.stage-selector-head {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    min-height: 3em;
+    height: fit-content;
+    margin-top: -0.5em;
+    margin-bottom: 0.5em;
+}
+
+.stage-selector-searchbox {
+    height: 2em;
+    width: 40%;
+    font-size: 1.5em;
+    background-color: white;
+    border: black 1px solid;
+}
+
+.stage-selector-tab-button-box {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+    grid-auto-flow: row;
+    min-height: 3em;
+    height: fit-content;
+    width: 60%;
+    user-select: none;
+}
+
+.stage-selector-tab-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 3em;
+    width: 5em;
+    text-wrap: wrap;
+    text-align: center;
+    color: white;
+    background-color: blue;
+    font-weight: bold;
+    padding: 0em 0.25em;
+    margin: 1px;
+    border-image: url(../img/background/buttonBackground.jpg) 5 fill;
+    border-width: 5px;
+    border-style: solid;
+    transition: all 0.2s ease-in-out;
+}
+
+.stage-selector-tab-button:hover{
+    filter: brightness(80%);
+}
+
+.stage-selector-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    grid-auto-flow: row;
+    width: 100%;
+}
+.stage-selector-subgroup {
+    display: flex;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    grid-auto-flow: row;
+    padding: 0.75em;
+}
+.s-subgroup{
+    max-width: 10.5em;
+    justify-content: center;
+}
+.m-subgroup{
+    max-width: 17em;
+    justify-content: center;
+}
+.l-subgroup{
+    max-width: 25em;
+    justify-content: center;
+}
+.stage-selector-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url(../img/background/bossTitleBackground.png) no-repeat center;
+    max-height: 4em;
+    height: 4em;
+    background-size: 26em 4em;
+    background-position-y: top;
+    width: 100%;
+}
+.stage-selector-subtitle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.stage-selector-button{
+    margin: 0.16em;
+    transition: all 0.2s ease-in-out;
+}
+.stage-selector-button:hover{
+    filter: brightness(120%);
+}
+.stage-selector-portrait{
+    width: 8em;
+    height: 5.6em;
+    background: url(../img/portrait/Default.png) no-repeat center;
+    background-size: cover;
+    position: relative;
+}
+.stage-selector-item-box{
+    display: flex;
+    position:absolute;
+    left: 0;
+    bottom: 0;
+}
+.stage-selector-item{
+    width: 2em;
+    height: 2em;
+    background: url(../img/icon/luckyIcons/215.jpg) no-repeat center;
+    background-size: cover;
+}
+.stage-selector-button-text{
+    display: flex;
+    justify-content: center;
+    font-size: 0.69em;
+    color: white;
+}

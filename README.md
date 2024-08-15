@@ -1,4 +1,4 @@
-# Granblue-Fantasy-Tracker
+# Granblue Fantasy Loot Tracker
 ## Table of contents
 [Intro](#intro)\
 [New with latest release](#new-with-latest-release)\
@@ -6,27 +6,39 @@
 [Installation](#installation)\
 [How to update](#how-to-update)\
 [Removing the ("GBF Loot Tracker" started debugging this browser) notification](#removing-the-gbf-loot-tracker-started-debugging-this-browser-notification)\
-[How does the extension work?](#how-does-the-extension-work)
+[How does the extension work?](#how-does-the-extension-work)\
+[Privacy Policy](#privacy-policy)\
+[Contact me](#how-to-report-a-bug-ask-a-question-or-suggest-a-change)
 
 
 # Intro
-This is an extension that can automatically track the loot you receive from raids. 
+This is an extension that can automatically track the loot you obtain while playing Granblue Fantasy. 
 
-This extension does not interact directly with the game, so it won't be detected. Use of third-party tools is still against the terms of service so use at your own risk. This extension will always run in the background and track any loot you receive. You will never have to manually track your drops again!
+This extension runs within an isolated world in chrome and does not interact with the game in any way. This means that it is safe to use and impossible to detect by the game. This is done by using the chrome debugger library to scan traffic coming from the game and reading a copy of this data if it may contain information about loot obtained. This copy is provided by the browser and there is no way for the game to see it happening.
+
+This extension is also open source so anyone can look inside and see exactly how it works.
 
 # How to use it
-This extension works in the background and is always active, so you don't have to turn anything on or click a start tracking button. To view your tracked loot, navigate to the module.html page, click the gear icon in the top right of the module, and select the boss you want to see stats of from the dropdown. It is that simple!
+This extension works in the background and is always active, so you don't have to turn anything on, or click a start tracking button. To view your tracked loot, simply wait for a drop to be obtained, or click the "Add Tracker" button and select which stage you want to see your tracked loot for
 
-# New with latest release
-It is time to start tracking your Arcarum Sandbox progress! With release 1.0.5, it is now possible to track your Sandbox loot, Sandbox enemy kills, and Replicard Box drops + contents! You may notice the addition of several new enemies on the enemy dropdown:\
-![sandbox enemies](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/SephiraEnemiesRaidlist.png?raw=true)\
+# New with latest major release
+With version 1.1.0, the extension was completly rewritten. With the rewrite, many things were changed and added. This rewrite will make it a lot easier to develop for, as well as eliminate the possibility of several bugs occuring. Here is an example of some of the changes made!
 
-There is now a new tracker for each sandbox goal you would go for. Viewing your Sephira Box stats are easy! Simply click on the gold bar on the top left of the module to open the Loot Settings Menu, and click the Sephira Box Button.
+### New User Interface
 
-![sandbox enemies](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/SephiraStats1.png?raw=true)\
-![sandbox enemies](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/SephiraStats2.png?raw=true)\
-![sandbox enemies](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/SephiraData.png?raw=true)\
-Now you can see every Sephira box you received, as well as every piece of loot that dropped from a box
+![user interface](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG.PNG)\
+With the new UI, it is now possible to track many stages at the same time. No longer do you need to switch between several stages to keep on top of your drops.
+
+You can also now track the number of extra chests you get as drops. These would include the sky blue chests obtained from Magna 3 enemies, as well as the purple chests from extra drops events. This update also expands the number of enemies that the extension can detect.
+
+![stage select interface](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/stageSelectInterface.PNG)\
+With the new update came a new stage selector. Each stage is displayed along with any special loot you may obtain from it. There is also now a search bar you can use to find the stage even faster. The search bar can filter stages by name, alius, element, or special drop. Stages are grouped into tabs that should make it easier to find what you are looking for. 
+
+![data period UI](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/dataPeriodUI.PNG)\
+You can use a data period filter to only see drops that occured within a period of time. With this, you can choose when the data you want to see is from.
+
+![settings](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/settings.PNG)\
+Update 1.1.0 also added a settings page where you can change some of the settings for the extension. This is also where you can import and export data from the extension if you choose to back up your data.
 
 # Installation
 
@@ -38,13 +50,22 @@ Now you can see every Sephira box you received, as well as every piece of loot t
 ![installation gif](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/Install.gif?raw=true)
 
 # How to update
-You have 2 options for updating the extension. You can either use the updater tool or replace the files manually.
+You have 2 options for updating the extension. You can either use the updater tool or replace the files manually. With version 1.1.0, a GUI tool was added to make updating easier
 ### 1. Using the "GBFLootTrackerUpdater.exe" tool
-1. Download GBFLootTrackerUpdater.exe from the repository
-2. Place GBFLootTrackerUpdater.exe in the folder holding the "GBF Loot Tracker" folder. (Make sure you don't put the updater inside the "GBF Loot Tracker" folder, but beside it)
-3. Run "GBFLootTrackerUpdater.exe" and enter "yes" when prompted to begin the upgrade.
+![updater](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/Updater.PNG)\
+1. [Download the LootTrackerUpdater.exe app from the updater github repository here.](https://github.com/granbluetracker/Granblue-Fantasy-Tracker-Updater/releases/latest)
+2. Run the application and select the manifest.json file that is in the extension folder. This should be in the same place where you installed the extension from. If you can't find the file, you can check it's location by:
+-   Navigating to chrome://extensions/
+-   Clicking on the "Details" button below the GBF Loot Tracker extension
+-   Scrolling down on the page until you see the section labeled "Source"
+-   Clicking the file path after "Loaded from:" will open the folder with the manifest.json file
+3. Select the version you would like to install. This will be the latest version by default.
+4. Clicking the update button.
+5. Navigating to chrome://extensions/ and clicking the reload button on the bottom left of the GBF Loot Tracker extension.
 
-The "GBFLootTrackerUpdater.exe" is written in C# (using .NET 8.0). You can see the source code for this in the repository if you're curious. I also included a python script that does the same thing. I may create a GUI based updater in the future to replace this one so be sure to look out for that.
+The "LootTrackerUpdater.exe" program is written in C# (using net8.0-windows and wpf). You can see the source code for this in the repository if you're curious. The program doesn't need to be installed and should just work. 
+
+The command line program and python script that does this is no longer supported as that was just a bandaid solution until the GUI application was created.
 ### 2. Replacing the files manually
 1. Download the version you would like to change to
 2. Place the zipped file in the same directory that holds the "GBF Loot Tracker" folder, so they are beside each other
@@ -66,34 +87,18 @@ After you do this, you should no longer see any notifications.
 ![Adding silent debug flag png](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/DisableBanner.png?raw=true)
 
 # How does the extension work
-The extension runs in the background as you use chrome by using a service worker script. It works by capturing data in 3 distinct stages:
+The extension runs in the background as you use chrome by using a service worker script. This script checks traffic coming from game.granbluefantasy.jp for any files that have a url that could contain loot data. The extension uses the chrome debugger library to read a copy of this data and see if it contains any loot data.
 
-[1. Detect when a tab is playing Granblue Fantasy](#detect-when-a-tab-is-playing-granblue-fantasy)\
-[2. Capture any data containing loot that was dropped in the game](#capture-any-data-containing-loot-that-was-dropped-in-the-game)\
-[3. Process the captured data in a format that is easy to read and display](#process-the-captured-data-in-a-format-that-is-easy-to-read-and-display)
+If loot data is found, the extension extracts it and stores the data locally in a table. When you look at the loot you obtained, this is the table that is read from.
 
-### Detect when a tab is playing Granblue Fantasy
-This is the easiest stage. When a tab visits a new URL, an event listener in the extension sees it. If the game visits Granblue Fantasy, a debugger is attached and network events are activated, allowing the extension to see chrome's communications with the Cygames servers. When a chrome tab has a debugger attached and visits a URL other than Granblue Fantasy, that debugger is removed which stops the extension from seeing any network traffic from that tab.
+This all happens in a seperate context than what the game runs in. This means that we cannot directly inspect the memory of the game. The downside of this is that it requires a lot more code to interpret information about loot obtained from the game. The upside though, is that it becomes impossible for the game to detect you using this extension. 
 
-### Capture any data containing loot that was dropped in the game
-A useful feature with debuggers are that they allow you to communicate with Chrome tabs out of the view of any websites you are on. This is perfect if you want to capture data from Granblue Fantasy without the game detecting it. The only way that Granblue Fantasy can detect that an extension is active on the page is if that extension changes elements on it, such as adding an extra menu to the game. Because the loot tracker doesn't do this, it won't be detected by the game.
+# Privacy Policy
+The extension will never collect any data about the user beyond what is required to make this extension function. This extension does not collect or report any analytics about the data collected by the extension.
 
-When the Granblue Fantasy servers send Chrome information about the game, the debugger relays this same information to the extension. If the Granblue Fantasy servers send Chrome a file with a source URL starting with: [https://game.granbluefantasy.jp/resultmulti/content/index/###########], it means that that file contained the results of a battle. The extension records the requestId associated with that file download and waits for a Network.loadingFinished event that matches the recorded requestId. 
+The only data collected by the extension are stage clears. When you clear a stage in Granblue Fantasy, information about the event such as the time it occured, what items were obtained, and the types of chests obtained (red/blue/purple). This data is stored in local storage and will never be sent remotely.
 
-When the extension sees that the download finished, it asks Chrome to give a copy of the contents of that request to the extension. The game will never see this since Chrome is asked for the version it has stored locally, not the game servers.
-
-### Process the captured data in a format that is easy to read and display
-When the extension captures new data, it goes through several processing steps to make it usable by other parts of the extension. For this example, lets look at what happens to the results of a fight against Seofon. When you kill him, the extension captures this json file containing the results. The file is first converted into json format so that it can be read more easily.\
-![Response Body](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/ResponseBody.png?raw=true)\
-The display_list holds the info about the loot you have favorited and are displaying at the bottom of your screen. The info we need is located under option.result_data. The extension then discards any data that isn't under option.result_data which leaves us with this:\
-![result data](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/OptionResult.png?raw=true)\
-The important data here is quest type (A quest type of "1" means that this result data is from a raid) and the data under rewards.reward_list. This is where you find the info about which items dropped and how many. In our case, we received these items:\
-![reward list](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/RewardList.png?raw=true)\
-Any drops that are stored under number 3 are contained in gold chests. Drops under number 4 are contained in blue chests. Drops under number 11 are contained in red chests which can either be an MVP chest, Vice MVP chest, or Host chest. If you look at the drops from the game, you can see this holds true.\
-![loot collected](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/LootCollected.png?raw=true)\
-The item IDs, quantity, and number of each type of chest are extracted and used to create a new json which looks like this:\
-![table row](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/tableRow.png?raw=true)\
-epochTime is the time when the drop occurred, this allows us to view only loot we received during a certain period, like the last day/week/month. The item list is then used with the battle type (1) to determine which battle this data came from. Unfortunately, the game doesn't store where the loot came from, only the loot you received. Because the battle type is 1, we know that this is from a raid, so we compare the loot against all known raid bosses. We see that the reward list contains (ID: 589) which is the item "Remnants of the Star-Sea's Edge". This item can only be obtained from the raid "Seofon", so we now know which enemy dropped the loot. The json we made in the last step is then stored in Seofon's loot table which can be read by the json whenever we want to see our loot from Seofon. 
+The only remote connection made by the extension is a simple GET request to this github page. The purpose of this is so the extension can see if a new version was released, and display that information to you. There is no way for me to see any information about this request.
 
 # How to report a bug, ask a question, or suggest a change
 Please send all of that to granbluetracker@gmail.com and I should see it. I'm always happy to answer any questions and respond to any feedback/suggestions. I hope you enjoy the extension!

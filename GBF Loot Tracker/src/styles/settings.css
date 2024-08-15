@@ -1,0 +1,118 @@
+
+#settingsMenu{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 48em;
+    height: max-content;
+    min-height: 20em;
+    margin: 2em auto;
+    border-image: url(../img/background/moduleBackgroundEdited.png) 25 25 fill;
+    border-width: 1.5em;
+    border-style: solid;
+    user-select: none;
+}
+
+.settings-block{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.settings-title{
+    font-size: 2em;
+    margin: 0.5em 0em 1em 0em;
+    color: white;
+}
+
+.settings-subtitle{
+    font-size: 1.5em;
+    margin-top: 0.5em;
+    color: white;
+}
+
+.settings-row{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    min-width: 32em;
+    padding: 1em 5em;
+}
+
+.settings-text{
+    color: white;
+}
+
+.settings-button{
+    color: white;
+    background-color: black;
+    width: 45%;
+    height: 4em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+}
+
+.settings-button:hover {
+  border-color: gray;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: gray;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: lightskyblue;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }

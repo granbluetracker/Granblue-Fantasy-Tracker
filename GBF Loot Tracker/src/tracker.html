@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loot Tracker</title>
+  <link rel="icon" href="img/favcon.png">
+  <link rel="stylesheet" href="styles/general.css" />
+  <link rel="stylesheet" href="styles/stageSelector.css" />
+  <link rel="stylesheet" href="styles/tracker.css" />
+  <script async type="module" src="scripts/populateHeader.js"></script>
+  <script async type="module" src="scripts/moduleScripts/trackerController.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div id="header">
+      <div>
+        Granblue Fantasy Loot Tracker
+        <span id="headerVersion"></span>
+      </div>
+    </div>
+  </header>
+  <div id="bg"></div>
+  <div id="c-trackerController">
+    <div id="trackerControllerHead">
+      <div id="trackerControllerHeadButtons">
+        <div id="addTrackerButton" class="tracker-controller-head-button">Add tracker</div>
+        <div id="removeTrackerButton" class="tracker-controller-head-button">Remove tracker</div>
+        <div id="clearTrackersButton" class="tracker-controller-head-button">Clear all trackers</div>
+        <div id="dataPeriodButton" class="tracker-controller-head-button">Data Period:&nbsp;<span id="dataPeriodText"></span></div>
+      </div>
+      <div id="trackerLastDrop">
+        <div id="c-trackerLastDropName">
+          <div>Last Drop:</div>
+          <div id="trackerLastDropName"></div>
+        </div>
+        
+        <div id="trackerLastDropItems"></div>
+      </div>
+    </div>
+    <div id="trackerControllerBody">
+    </div>
+  </div>
+  <div class="stage-selector">
+  </div>
+  <div id="dataPeriodSelector">
+    <div class="period-selector-section">
+      <div class="period-selector-button period-0" data-period="0">All</div>
+      <div class="period-selector-button period-1" data-period="1">Month</div>
+      <div class="period-selector-button period-2" data-period="2">Week</div>
+      <div class="period-selector-button period-3" data-period="3">Day</div>
+      <div class="period-selector-button period-4" data-period="4">Timer</div>
+    </div>
+    <div class="period-selector-section">
+      <div id="periodResetTimerButton">Reset Timer</div>
+      <div id="timer">Timer</div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Extension Settings</title>
+    <link rel="icon" href="img/favcon.png">
+    <link rel="stylesheet" href="styles/general.css" />
+    <link rel="stylesheet" href="styles/settings.css" />
+    <script async type="module" src="scripts/populateHeader.js"></script>
+    <script async type="module" src="scripts/settings.js"></script>
+</head>
+
+<body>
+    <header>
+        <div id="header">
+            <div>
+                Granblue Fantasy Loot Tracker
+                <span id="headerVersion"></span>
+            </div>
+        </div>
+        <div id="settingsMenu">
+            <div class="settings-block">
+                <div class="settings-title">Extension Settings</div>
+                <div class="settings-subtitle">Tracker Controller Settings</div>
+                <div class="settings-row">
+                    <div class="settings-text">Add a new tracker for any detected drops:</div>
+                    <label class="switch">
+                        <input type="checkbox" value="useUnlockedStage">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-text">Show the last drop in the tracker controller header:</div>
+                    <label class="switch">
+                        <input type="checkbox" value="useLastDrop">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-subtitle">Visual Settings</div>
+                <div class="settings-row">
+                    <div class="settings-text">Dark Mode:</div>
+                    <label class="switch">
+                        <input type="checkbox" value="darkmode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-subtitle">Extension Data Management</div>
+                <div class="settings-row">
+                    <input type="file" id="restoreData" name="restoreData" accept=".json" style="display:none;">
+                    <label for="restoreData" id="restoreDataButton" class="settings-button">
+                        Upload All Extension Data
+                    </label>
+                    <div id="downloadDataButton" class="settings-button">Download All Extension Data</div> 
+                </div>
+                <div class="settings-subtitle">Extension Debug Buttons</div>
+                <div class="settings-row">
+                    <div class="settings-text">Prints all extension settings in the console.</div>
+                    <div id="printSettingsButton" class="settings-button">Log all settings</div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-text">Resets settings to default. Does not delete data.</div>
+                    <div id="resetSettingsButton" class="settings-button">Reset Settings</div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-text">Recalculates all stored stage data.</div>
+                    <div id="recalculateDataButton" class="settings-button">Recalculate all data</div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-text">Fixes known errors in the data.</div>
+                    <div id="fixDataButton" class="settings-button">Fix known errors</div>
+                </div>
+            </div>
+            <div class="settings-subtitle">More settings comming soon...</div>
+        </div>
+    </header>
+</body>
+
+</html>

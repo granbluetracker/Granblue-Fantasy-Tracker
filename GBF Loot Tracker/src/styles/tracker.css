@@ -1,0 +1,356 @@
+/*This is the div that all tracker controller content sits in*/
+div#c-trackerController {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 32em;
+    max-width: 100%;
+    width: max-content;
+    margin: 0em auto;
+}
+
+/*Box that holds the controls for all trackers*/
+#trackerControllerHead {
+    display: flex;
+    flex-direction: column;
+    min-width: 48em;
+    width: 98%;
+    min-height: 4em;
+    margin: 0.2em auto;
+    border-image: url(../img/background/itemBackground.jpg) 6 6 fill;
+    border-width: 6px;
+    border-style: solid;
+}
+#trackerControllerHeadButtons{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 4em;
+}
+#trackerLastDrop{
+    display: none;
+    flex-direction: row;
+    max-height: 5em;
+    align-items: center;
+    justify-content: flex-start;
+}
+#c-trackerLastDropName{
+    display: flex;
+    flex-direction:column;
+    color: white;
+    font-size: 1.5em;
+    min-width: max-content;
+    margin: auto 0.5em;
+    max-height: 4em;
+    align-items: center;
+}
+#trackerLastDropItems{
+    display: flex;
+    flex-direction: row;
+    max-height: 5em;
+    height: fit-content;
+    flex-wrap: nowrap;
+}
+
+.tracker-controller-head-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 9em;
+    height: 2em;
+    margin: 0.5em;
+    color: white;
+    border-image: url(../img/background/buttonBackground.jpg) 5 fill;
+    border-width: 5px;
+    border-style: solid;
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+}
+
+.tracker-controller-head-button:hover{
+    filter: brightness(80%);
+}
+
+.tracker-controller-head-button:hover{
+    background-color: gray;
+}
+
+/*Div that holds all trackers*/
+div#trackerControllerBody {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    grid-auto-flow: row;
+}
+
+/*Class to style a tracker*/
+.tracker{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 20em;
+    height: max-content;
+    max-width: 29em;
+    width: 29em;
+    border-image: url(../img/background/moduleBackgroundClipped.png) 25 25 fill;
+    border-width: 1.5em;
+    border-style:groove;
+    margin: 0em 0.5em 1em 0.5em;
+    z-index: 2;
+}
+
+/*Classes for every possible part of a tracker*/
+/*Box that holds stage name*/
+.tracker-stage-title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url(../img/background/bossTitleBackground.png) no-repeat center;
+    max-height: 4em;
+    height: 4em;
+    background-size: 90% 4em;
+    background-position-y: top;
+}
+
+/*Box that holds info about the stage*/
+.tracker-info{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    height: 8em;
+}
+/*Picture of the stage*/
+.tracker-info-portrait {
+    height: 6.3em;
+    width: 9em;
+    margin: 0em 3em 0em 2em;
+    background: url(../img/portrait/Default.png) no-repeat center;
+    background-size: cover;
+}
+/*Box that the stats go in*/
+.tracker-info-stats {
+    display: flex;
+    flex-direction: column;
+    width: 12em;
+}
+/*A row of stats*/
+.tracker-info-stats-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+/*Either the name of a stat or it's value*/
+.tracker-info-stats-item {
+    color: white;
+    font-size: 1.2em;
+}
+
+/*Holds the sections for lucky/tracked/common loot*/
+.c-tracker-loot {
+    user-select: none;
+}
+
+/*Box for a type of drop*/
+.tracker-loot{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/*Name of the type of drop*/
+.tracker-loot-title{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: url(../img/background/lootTitleBackground.png) no-repeat center;
+    background-size: 55%;
+    width: 100%;
+    height: 3em;
+}
+/*Box that all drops of that type go into*/
+.tracker-loot-drops{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    grid-auto-flow: row;
+    width: 100%;
+    height: max-content;
+}
+/*Stores the loot image and text*/
+.tracker-loot-box{
+    width: 7em;
+    height: 4em;
+    margin: 0.12em;
+    background: no-repeat center;
+    background-size: cover;
+    position: relative;
+}
+/*Stores the "x" symbol and count*/
+.tracker-loot-tag{
+    display: flex;
+    justify-content: right;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    padding: 0em 0.2em;
+    color: white;
+    background-color: rgba(0,0,0,0.4);
+    border-radius: 10%;
+    border-radius: 10% 0 0 0;
+}
+.tracker-loot-multi{
+    margin: 0;
+    bottom: -0.3em;
+    position: relative;
+    font-size: 0.9em;
+}
+/*Text for how many items there are*/
+.tracker-loot-count{
+    font-size: 1.2em;
+}
+
+/* Sephira tracker elements */
+.tracker-sephira-info{
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+.tracker-sephira-title-img{
+    margin-top: 0.5em;
+}
+.tracker-sephira-chest-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.tracker-sephira-chest-box{
+    margin: 0em 0.25em;
+}
+.c-tracker-sephira-chest-img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4.5em;
+    width: 4.5em;
+    background: url(../img/icon/sephira/chestIconBackground.png) center/80% no-repeat;
+}
+.tracker-sephira-chest-img{
+    height: 3em;
+    width: 3em;
+}
+.tracker-sephira-chest-count{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.2em;
+    background-color: rgba(88, 77, 186, 0.4);
+    border-radius: 0.25em;
+    color: white;
+    font-size: 1.2em;
+}
+.tracker-xeno-boxes{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+.tracker-xeno-box-info{
+    display: flex;
+    flex-direction: column;
+}
+
+.tracker-remove-clickbox{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+} 
+.tracker-remove-clickbox:hover{
+    background-color: rgba(255, 0, 0, 0.5);
+}
+
+#dataPeriodSelector{
+    position: absolute;
+    top: 10em;
+    display: none;
+    flex-direction: column;
+    min-width: 35em;
+    height: 7em;
+    z-index: 4;
+    border-image: url(../img/background/itemBackground.jpg) 6 6 fill;
+    border-width: 6px;
+    border-style: solid;
+}
+
+.period-selector-section{
+    position: relative;
+    width: 35em;
+    height: 3.5em;
+    padding: 0.25em;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.period-selector-button{
+    background-color: black;
+    color: white;
+    height: 2.25em;
+    width: 6em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    border-image: url(../img/background/buttonBackground.jpg) 5 fill;
+    border-width: 5px;
+    border-style: solid;
+    transition: all 0.2s ease-in-out;
+}
+
+.period-selector-button:hover{
+    filter: brightness(75%);
+}
+
+#periodResetTimerButton{
+    background-color: black;
+    color: white;
+    height: 2.25em;
+    width: 6em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    border-image: url(../img/background/buttonBackground.jpg) 5 fill;
+    border-width: 5px;
+    border-style: solid;
+    transition: all 0.2s ease-in-out;
+}
+
+#periodResetTimerButton:hover{
+    filter: brightness(75%);
+}
+
+.period-selected-button{
+    filter: brightness(75%);
+}
+
+#timer{
+    margin: auto auto;
+    height: 2.25em;
+    min-width: 12em;
+    text-align: center;
+    align-content: center;
+    color: white;
+    border-image: url(../img/background/buttonBackground.jpg) 6 6 fill;
+    border-width: 6px;
+    border-style: solid;
+}
+
+.hidden{
+    display: none;
+}

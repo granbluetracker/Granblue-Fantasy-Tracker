@@ -4,7 +4,7 @@ body {
 }
 #nav {
     width: 20em;
-    height: 10em;
+    height: 12em;
     border-image: url(../img/background/moduleBackgroundClipped.png) 20 fill;
     border-width: 1em;
     size: 1.1;

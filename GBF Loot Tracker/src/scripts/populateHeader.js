@@ -1,4 +1,4 @@
-const header = document.getElementById("headerVersion");
+const headerVersion = document.getElementById("headerVersion");
 var currentVersion = chrome.runtime.getManifest();
 currentVersion = currentVersion.version;
-header.innerHTML = "&nbsp;v" + currentVersion;
+headerVersion.innerHTML = "&nbsp;v" + currentVersion;

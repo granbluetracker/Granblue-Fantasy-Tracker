@@ -1,0 +1,88 @@
+header{width: 100%;}
+
+div#header {
+    background-color: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 3em;
+    max-height: fit-content;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.test-menu{
+    display: flex;
+    flex-direction: row;
+}
+
+.test-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 2em;
+    min-width: 4em;
+    max-width: fit-content;
+    background-color: white;
+    color: black;
+    margin: 0em 0.5em;
+    padding: 0.25em;
+    text-align: center;
+}
+
+.test-button:hover {
+    background-color: gray;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+    width: 100%;
+    background-image: -webkit-linear-gradient(left, #88aeb7 0%,#b8d0d3 5%,#cfe8eb 20%,#d2d4cf 80%,#c7cebd 95%,#afc1c5 100%);
+    background-attachment: fixed;
+    font-family: "FOT-テロップ明朝 Pro D","Average Sans",sans-serif;
+    font-size: 100%;
+}
+
+body.dark {
+    background-image: linear-gradient(109.6deg, rgb(36, 45, 57) 11.2%, rgb(16, 37, 60) 51.2%, rgb(0, 0, 0) 98.6%);
+}
+
+#bg {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: brightness(40%);
+}
+
+/*General elements*/
+.divider {
+    height: 1em;
+    width: 100%;
+    background: url("../img/background/divider.png") no-repeat center;
+    background-size: 85%;
+    margin: 0.5em;
+}
+/*Used for titles*/
+.title-text{
+    color: white;
+    font-size: 1.3em;
+    padding-bottom: 0.15em;
+}
+.subtitle-text{
+    color: white;
+}
+.hidden{
+    display: none;
+}
+.invisible{
+    visibility: hidden;
+}
