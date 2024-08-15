@@ -1093,7 +1093,7 @@ const storageProxy = new StorageProxy();
 
 async function InitializeServiceWorker() {
     var settings = await storageProxy.get("Settings");
-    if (!settings.hasOwnProperty("timerStart")){console.log("ERROR: settings did not have timerStart property set")}
+    if (settings == undefined || !settings.hasOwnProperty("timerStart")){console.log("ERROR: settings did not have timerStart property set")}
     else {timerStart = settings.timerStart;}
     CheckForUpdate();
     DebuggerManager.EnableEventListeners();
