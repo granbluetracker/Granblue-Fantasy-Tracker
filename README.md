@@ -51,8 +51,7 @@ Update 1.1.0 also added a settings page where you can change some of the setting
 # How to update
 You have 2 options for updating the extension. You can either use the updater tool or replace the files manually. With version 1.1.0, a GUI tool was added to make updating easier
 ### 1. Using the "GBFLootTrackerUpdater.exe" tool
-![updater](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/Updater.PNG)\
-
+![updater](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/Updater.PNG)
 1. [Download the LootTrackerUpdater.exe app from the updater Github repository here.](https://github.com/granbluetracker/Granblue-Fantasy-Tracker-Updater/releases/latest)
 2. Run the application and select the manifest.json file that is in the extension folder. This should be in the same place where you installed the extension from. If you can't find the file, you can check it's location by:
 -   Navigating to chrome://extensions/
