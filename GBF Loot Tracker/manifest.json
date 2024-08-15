@@ -1,7 +1,7 @@
 {
   "name": "GBF Loot Tracker",
   "description": "This extension automatically tracks your drops and progress in Granblue Fantasy",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "manifest_version": 3,
   "options_page": "src/tracker.html",
 
