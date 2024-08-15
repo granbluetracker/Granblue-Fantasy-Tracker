@@ -26,7 +26,7 @@ With version 1.1.0, the extension was completly rewritten. With the rewrite, man
 
 ### New User Interface
 
-![user interface](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG.PNG)\
+![user interface](https://github.com/granbluetracker/Granblue-Fantasy-Tracker/blob/main/README_IMG/UserInterface.PNG)\
 With the new UI, it is now possible to track many stages at the same time. No longer do you need to switch between several stages to keep on top of your drops.
 
 You can also now track the number of extra chests you get as drops. These would include the sky blue chests obtained from Magna 3 enemies, as well as the purple chests from extra drops events. This update also expands the number of enemies that the extension can detect.
