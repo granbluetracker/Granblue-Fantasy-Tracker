@@ -4,6 +4,8 @@ import config from './config.js';
 class storageManager{
     /** @type {extensionSettings | undefined} */
     settings;
+    eventList = {};
+    eventNames = [];
 
     constructor(){
         chrome.storage.onChanged.addListener((changes, areaname) => {this.processStorageUpdate(changes, areaname)});
@@ -13,7 +15,12 @@ class storageManager{
 
     async init(){
         this.settings = await getObjectFromLocalStorage("Settings");
-        if (this.settings == undefined){this.buildSettings()}
+        this.eventList = await getObjectFromLocalStorage("eventList");
+        for (var key in this.eventList){
+            if (!this.eventList[key]?.EventTitle){continue;}
+            this.eventNames.push(this.eventList[key].EventTitle)
+        }
+        if (this.settings == undefined){this.buildSettings();}
         let body = document.querySelector("body");
         if (this.settings.darkmode){body.classList.add("dark");}
         else {body.classList.remove("dark");}
@@ -29,7 +36,7 @@ class storageManager{
             else {body.classList.remove("dark");}
             return;
         }
-        if (!config.isValidStage(storageKey)){return;} // Storage update was not for a valid stage
+        if (!config.isValidStage(storageKey) && !this.eventNames.includes(storageKey)){return;} // Storage update was not for a valid stage
         /** If oldValue isn't defined, it is the first stage drop of a new stage clear
          * but if oldValue is defined and oldValue and newValue is the same size, there is no new data to display
          */
@@ -68,8 +75,19 @@ class storageManager{
         console.log(selectedStages);
         var stageInfo = config.getStageInfo(stageName);
         if (stageInfo == undefined){
-            console.log("ERROR: updateViewedStages() recieved an invalid stageName as input: " + stageName);
-            return;
+            // stageName may belong to an event stage
+            for (let eventId in this.eventList){
+                if (this.eventList[eventId]?.EventTitle == stageName && this.eventList[eventId]?.EventId){
+                    let c = this.eventList[eventId].EventId[0];
+                    if (c < '0' || c > '9'){return undefined;}
+                    stageInfo = {type: c};
+                    break;
+                }
+            }
+            if (stageInfo == undefined){
+                console.log("ERROR: updateViewedStages() recieved an invalid stageName as input: " + stageName);
+                return;
+            }
         }
         if (!stageInfo.hasOwnProperty("type")){stageInfo.type = 0}
         switch(isAdded){ // Adds stage to tracked list
@@ -95,6 +113,23 @@ class storageManager{
             default:
                 console.log("Error, isAdded wasn't true or false: " + isAdded);
         }    
+    }
+
+    checkEventType(eventName){
+        for (let eventId in this.eventList){
+            if (this.eventList[eventId]?.EventTitle == eventName && this.eventList[eventId]?.EventId){
+                let c = this.eventList[eventId].EventId[0];
+                switch (c) {
+                    case "1":
+                        return "3";
+                    case "3":
+                        return "4";
+                    default: 
+                        return undefined;
+                }
+            }
+        }
+        return undefined;
     }
 }
 

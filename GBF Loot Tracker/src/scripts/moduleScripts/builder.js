@@ -13,6 +13,10 @@ class trackerInstanceBuilder {
                 return this.buildSephiraBoxTracker();
             case "2":
                 return this.buildXenoBoxTracker();
+            case "3":
+                return this.buildGuildWarTracker();
+            case "4":
+                return this.buildGuildWarTracker();
             default:
                 console.log("ERROR: trackerInstanceBuilder recieved invalid trackerType input: " + type);
                 return undefined;
@@ -59,6 +63,16 @@ class trackerInstanceBuilder {
         return this.linkAllElements(headElement);
     }
 
+    static buildGuildWarTracker(){
+        let headElement = this.buildElement("div", "tracker");
+        headElement.appendChild(this.buildStageTitle());
+        headElement.appendChild(this.buildEventInfo("4"));
+        headElement.appendChild(this.buildGuildWarInfo());
+        headElement.appendChild(this.buildStageLoot());
+        headElement.appendChild(this.buildElement("div", "tracker-remove-clickbox"));
+        return this.linkAllElements(headElement);
+    }
+
     /**
      * Builder method for the title element of a tracker.\
      * - Goes on all trackers
@@ -67,7 +81,7 @@ class trackerInstanceBuilder {
     static buildStageTitle(){
         // Constructs HTML for a default stage title element
         let stageTitle = this.buildElement("div", "tracker-stage-title");
-        let stageTitleText = this.buildElement("span", "title-text");
+        let stageTitleText = this.buildElement("span", "tracker-stage-title-text");
         stageTitle.appendChild(stageTitleText);
         return stageTitle;
     }
@@ -97,8 +111,6 @@ class trackerInstanceBuilder {
         let infoStatsRow = this.buildElement("div", "tracker-info-stats-row");
         let infoStatsItem = this.buildElement("div", "tracker-info-stats-item");
         // console.log(infoStatsRow, infoStatsItem);
-        let clone = infoStatsItem.cloneNode(true);
-        // console.log(clone);
         infoStatsRow.appendChild(infoStatsItem.cloneNode(true));
         infoStatsRow.appendChild(infoStatsItem.cloneNode(true));
         infoStatsRow.lastChild.innerHTML = "0";
@@ -110,6 +122,76 @@ class trackerInstanceBuilder {
             trackerInfoStats.appendChild(rowElement);
         }
         return trackerInfo;
+    }
+
+    static buildEventInfo(trackerType){
+        //return this.buildElement("div", "tracker-event-info");
+        const eventInfoAll = [
+            "Very Hard (solo):", // 0
+            "Very Hard+ (solo)", // 1
+            "Extreme (solo):", // 2
+            "Extreme+ (solo):", // 3
+            "Maniac (solo)", // 4
+            "Maniac+ (solo)", // 5
+            "Nightmare:", // 6
+            "Very Hard:", // 7
+            "Extreme:", // 8
+            "Extreme+:", // 9
+            "Impossible:", // 10
+            "Nightmare 90:", // 11
+            "Nightmare 95:", // 12
+            "Nightmare 100:", // 13
+            "Nightmare 150:", // 14
+            "Nightmare 200:", // 15
+            "Nightmare 250:", // 16
+        ];
+        let eventInfoHeadElement = this.buildElement("div", "tracker-event-info");
+        eventInfoAll.forEach((value) => {
+            let itemContainer = this.buildElement("div", "c-tracker-event-item");
+            let itemElement = this.buildElement("div", "tracker-event-item");
+            let textElement = this.buildElement("div", "tracker-event-text");
+            textElement.innerHTML = value;
+            let countElement = this.buildElement("div", "tracker-event-count");
+            countElement.innerHTML = "0";
+            itemElement.appendChild(textElement);
+            itemElement.appendChild(countElement);
+            itemContainer.appendChild(itemElement);
+            eventInfoHeadElement.appendChild(itemContainer);
+        });
+        return eventInfoHeadElement;
+    }
+
+    static buildGuildWarInfo(){
+        let guildWarHeadElement = this.buildElement("div", "tracker-guild-war");
+        let rowElement = this.buildElement("div", "tracker-guild-war-row");
+        const guildWarItems = {
+            "Chests": {src: "url(./img/icon/event/Chests.jpg)"},
+            "EventTokens": {src: "url(./img/icon/event/EventTokens.jpg)"},
+            "EventItem1": {src: "url(./img/icon/event/EventItem1.jpg)"},
+            "EventItem2": {src: "url(./img/icon/event/EventItem2.jpg)"},
+            "EventItem3": {src: "url(./img/icon/event/EventItem3.jpg)"},
+            "GoldMedals": {src: "url(./img/icon/event/GoldMedals.jpg)"},
+            "SilverMedals": {src: "url(./img/icon/event/SilverMedals.jpg)"},
+            "BaitChunks": {src: "url(./img/icon/event/BaitChunks.jpg)"},
+            "MaliciousClumps": {src: "url(./img/icon/event/MaliciousClumps.jpg)"},
+            "Honors": {src: "url(./img/icon/event/Honors.jpg)"},
+            "TotalHonors": {src: "url(./img/icon/event/TotalHonors.jpg)"},
+            "DailyHonors": {src: "url(./img/icon/event/DailyHonors.jpg)"},
+            "CrewHonors": {src: "url(./img/icon/event/Honors.jpg)"},
+            "EnemyHonors": {src: "url(./img/icon/event/Honors.jpg)"},
+        }
+        for (let key in guildWarItems){
+            let itemElement = this.buildElement("div", "tracker-guild-war-item");
+            let imageElement = this.buildElement("div", "tracker-guild-war-image");
+            let itemCount = this.buildElement("div", "tracker-guild-war-count");
+            imageElement.style.backgroundImage = guildWarItems[key].src;
+            itemCount.innerHTML = "0";
+            itemElement.appendChild(imageElement);
+            itemElement.appendChild(itemCount);
+            rowElement.appendChild(itemElement);
+        }
+        guildWarHeadElement.appendChild(rowElement);
+        return guildWarHeadElement;
     }
 
     // Adds the stage loot to the bottom of the tracker
@@ -128,9 +210,9 @@ class trackerInstanceBuilder {
         for (let infoItem of lootInfo){
             let lootTypeContainer = this.buildElement("div", "tracker-loot");
             let titleBody = this.buildElement("div", "tracker-loot-title");
-            let titleText = this.buildElement("span", "title-text")
+            let titleText = this.buildElement("span", "tracker-loot-title-text");
             titleText.innerHTML = infoItem.titleText;
-            let lootDrops = this.buildElement("div", "tracker-loot-drops")
+            let lootDrops = this.buildElement("div", "tracker-loot-drops");
 
             titleBody.appendChild(titleText);
             lootTypeContainer.appendChild(titleBody);
@@ -253,6 +335,7 @@ class trackerInstanceBuilder {
      */
     static buildElement(elementType, elementClasses = "") {
         let element = document.createElement(elementType);
+        if (elementClasses == undefined || elementClasses.length == 0){return element;}
         if (typeof elementClasses == "string"){element.classList.add(elementClasses);}
         else if (typeof elementClasses == "object"){element.classList.add(...elementClasses);}
         return element;
@@ -267,8 +350,8 @@ class trackerInstanceBuilder {
         var elements = {};
         elements.tracker = headElement; 
         // Links tracker-stage-title
-        if (elements.tracker.querySelector(".title-text") != null)
-            {elements.stageTitleText = elements.tracker.querySelector(".title-text");}
+        if (elements.tracker.querySelector(".tracker-stage-title-text") != null)
+            {elements.stageTitleText = elements.tracker.querySelector(".tracker-stage-title-text");}
         
         // Links tracker-info
         // tracker portrait
@@ -313,6 +396,35 @@ class trackerInstanceBuilder {
             elements.sephiraBoxes = sephiraBoxCounts;
         }
 
+        if (elements.tracker.querySelector(".tracker-event-info")){
+            const eventInfo = elements.tracker.querySelector(".tracker-event-info");
+            elements.bossCounts = eventInfo.querySelectorAll(".tracker-event-count");
+        }
+
+        if (elements.tracker.querySelector(".tracker-guild-war")){
+            const guildWarHead = elements.tracker.querySelector(".tracker-guild-war");
+            const itemList = guildWarHead.querySelectorAll(".tracker-guild-war-count");
+            if (itemList != null && itemList.length > 0){
+                var guildWar = {
+                    Chests: itemList[0],
+                    EventTokens: itemList[1],
+                    EventItem1: itemList[2],
+                    EventItem2: itemList[3],
+                    EventItem3: itemList[4],
+                    GoldMedals: itemList[5],
+                    SilverMedals: itemList[6],
+                    BaitChunks: itemList[7],
+                    MaliciousClumps: itemList[8],
+                    Honors: itemList[9],
+                    TotalHonors: itemList[10],
+                    DailyHonors: itemList[11],
+                    CrewHonors: itemList[12],
+                    EnemyHonors: itemList[13],
+                }
+                elements.guildWar = guildWar;
+            }
+        }
+
         // Links tracker-remove-clickbox
         if (elements.tracker.querySelector(".tracker-remove-clickbox") != null)
             {elements.trackerRemoveClickbox = elements.tracker.querySelector(".tracker-remove-clickbox")}
@@ -321,15 +433,69 @@ class trackerInstanceBuilder {
 }
 
 class stageSelectorBuilder {
-    static newStageSelector(config){
-        let allStageInfo = config.getAllStageInfo();
+    static newStageSelector(config, eventStageInfo){
+        let staticStageInfo = config.getAllStageInfo();
         let mainElement = this.buildElement("div", "stage-selector");
-        let stageSelectorHead = this.buildStageSelectorHead(allStageInfo);
+        let stageSelectorHead = this.buildStageSelectorHead(staticStageInfo);
         mainElement.appendChild(stageSelectorHead);
-        for (let groupTitle in allStageInfo){
-            mainElement.appendChild(this.buildGroup(groupTitle, allStageInfo[groupTitle], config));
-        }
+        var tokenSubgroup, guildwarSubgroup, solotreasureSubgroup;
+        for (let groupTitle in staticStageInfo){
+            let groupElement = this.buildGroup(groupTitle, staticStageInfo[groupTitle], config)
+            switch (groupTitle){ // Stores these elements for later use
+                case "Event Stages":
+                    tokenSubgroup = this.buildElement("div", ["stage-selector-subgroup","l-subgroup","hidden"]);
+                    tokenSubgroup.appendChild(this.buildSubgroupTitle("Token Events"));
+                    solotreasureSubgroup = this.buildElement("div", ["stage-selector-subgroup","l-subgroup","hidden"]);
+                    solotreasureSubgroup.appendChild(this.buildSubgroupTitle("Solo Treasure Events"));
+                    guildwarSubgroup = this.buildElement("div", ["stage-selector-subgroup","l-subgroup","hidden"]);
+                    guildwarSubgroup.appendChild(this.buildSubgroupTitle("Guild Wars"));
+                    groupElement.appendChild(tokenSubgroup);
+                    groupElement.appendChild(solotreasureSubgroup);  
+                    groupElement.appendChild(guildwarSubgroup);
+                    break;
+            }
+            mainElement.appendChild(groupElement);
+        };
         // console.log(mainElement);
+        if (!tokenSubgroup || !guildwarSubgroup || !solotreasureSubgroup){console.log("Error, event tabs in stageSelectorBuilder were improperly linked..."); return mainElement}
+        // Adds any event stages to the stage selector
+        for (let eventId in eventStageInfo){
+            if (!eventStageInfo[eventId]?.EventTitle){continue;}
+            let stageName = eventStageInfo[eventId]?.EventTitle;
+            let eventButton = this.buildElement("div", "stage-selector-button");
+            eventButton.setAttribute("data-selection", stageName);
+            let eventButtonInner = this.buildElement("div", "stage-selector-button-event");
+            eventButtonInner.innerHTML = stageName;
+            eventButton.appendChild(eventButtonInner);
+            // let buttonPortrait = this.buildElement("div", "stage-selector-portrait");
+            // eventButton.appendChild(buttonPortrait);
+            // let buttonTextElement = this.buildElement("span", "stage-selector-button-text");
+            // buttonTextElement.innerHTML = stageName;
+            // eventButton.appendChild(buttonTextElement);
+            if (eventId.length < 4){console.log(`Error, eventId ${eventId} was shorter than 4 characters in newStageSelector`); continue;}
+            let eventType = eventId.substring(0, eventId.length - 3);
+            // console.log("EVENT TYPE: " + eventType + " typeof event type: " + typeof eventType)
+            switch (eventType){
+                case "1": 
+                    eventButton.setAttribute("data-type", "3");
+                    eventButton.setAttribute("data-alius", "token");
+                    tokenSubgroup.appendChild(eventButton);
+                    tokenSubgroup.classList.remove("hidden");
+                    break;
+                case "3":
+                    eventButton.setAttribute("data-type", "4");
+                    eventButton.setAttribute("data-alius", "guild war guildwar");
+                    guildwarSubgroup.appendChild(eventButton);
+                    guildwarSubgroup.classList.remove("hidden");
+                    break;
+                case "11":
+                    eventButton.setAttribute("data-type", "3");
+                    eventButton.setAttribute("data-alius", "solo treasure solotreasure");
+                    solotreasureSubgroup.appendChild(eventButton);
+                    solotreasureSubgroup.classList.remove("hidden");
+                    break;
+            }
+        }
         return mainElement;
     }
 

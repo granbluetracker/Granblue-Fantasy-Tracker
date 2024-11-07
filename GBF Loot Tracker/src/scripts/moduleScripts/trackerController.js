@@ -10,6 +10,7 @@ class trackerController {
     unlockedTracker = undefined
     dataPeriod = undefined;
     timerStart = 0;
+    /** @type {ControllerElements} */
     elements = {
         controllerHead: undefined,
         addTrackerButton: undefined,
@@ -26,15 +27,25 @@ class trackerController {
         resetTimerButton: undefined,
         lastDrop: undefined,
         lastDropName: undefined,
+        lastDropItemsContainer: undefined,
         lastDropItems: undefined,
     }
     timerInterval = null;
-
+    // lastDrop = {
+    //     scrollAmount: 0,
+    //     scrollDirection: 1,
+    //     scrollScalar: 0.5,
+    // }
+    
     constructor() {
+        this.init();
+    }
+
+    async init(){
+        await storageManager.init();
         this.initializeController();
         this.loadInitialStages();
         console.log("Tracker Controller has been started");
-        return this;
     }
 
     /**
@@ -54,6 +65,7 @@ class trackerController {
         this.elements.resetTimerButton = document.getElementById("periodResetTimerButton");
         this.elements.lastDrop = document.getElementById("trackerLastDrop");
         this.elements.lastDropName = document.getElementById("trackerLastDropName");
+        this.elements.lastDropItemsContainer = document.getElementById("c-trackerLastDropItems");
         this.elements.lastDropItems = document.getElementById("trackerLastDropItems");
 
         this.elements.addTrackerButton.addEventListener("click", () => this.showStageSelector(true));
@@ -71,7 +83,7 @@ class trackerController {
 
         window.addEventListener("NewStageClear", (e) => {this.newDrop(e)});
 
-        this.elements.stageSelectMenu = stageSelectorBuilder.newStageSelector(config);
+        this.elements.stageSelectMenu = stageSelectorBuilder.newStageSelector(config, storageManager.eventList);
         this.elements.stageSelectGroups = this.elements.stageSelectMenu.getElementsByClassName("stage-selector-group");
         // console.log(this.elements.stageSelectMenu);
         let stageSelectElement = document.querySelector(".stage-selector");
@@ -90,14 +102,16 @@ class trackerController {
 
         let stageSelectSearchbox = this.elements.stageSelectMenu.querySelector(".stage-selector-searchbox");
         stageSelectSearchbox.addEventListener("input", () => {this.updateDisplayedStages(stageSelectSearchbox.value)});
+        // Switches the stage selector to the raids tabs
         this.switchTab("Raids");
+        // Adds the autoscrolling functionality to the lastDrop item box
+        this.scrollLastDrop();
     }
 
     /**
      * Fetches the last known tracked stages and adds them to the controller
      */
     async loadInitialStages(){
-        await storageManager.init();
         this.dataPeriod = storageManager.settings.dataPeriod;
         this.timerStart = storageManager.settings.timerStart;
         this.timerInterval = setInterval(this.updateTimer.bind(this), 1000);
@@ -357,7 +371,13 @@ class trackerController {
      */
     async addTracker(stageName, stageData = undefined, isStageLocked = true){
         let stageInfo = config.getStageInfo(stageName);
-        if (stageInfo == undefined){console.log(stageName + " is not a valid stage..."); return;}
+        if (stageInfo == undefined){ // could be an event stage
+            let trackerType = storageManager.checkEventType(stageName);
+            console.log(`trackerType for event stage: ${trackerType}`);
+            if (trackerType == undefined){console.log(stageName + " is not a valid stage..."); return;}
+            stageInfo = {"type": trackerType}
+            console.log("StageInfo:",stageInfo);
+        }
         if (!stageInfo.hasOwnProperty("type")){stageInfo.type = "0";}
         // Fetches stageData if it was not passed as a param
         if (stageData == undefined){
@@ -372,7 +392,6 @@ class trackerController {
         else {stageData = stageData[this.dataPeriod];}
 
         console.log("Tracking data for the stage: " + stageName);
-        
         let newTracker = new trackerInstance(stageName, stageData, stageInfo.type);
         this.elements.controllerBody.appendChild(newTracker.getTracker());
         if (isStageLocked){
@@ -423,6 +442,29 @@ class trackerController {
         console.log("All active trackers cleared!");
     }
 
+    scrollLastDrop(){
+        const itemsContainer = this.elements.lastDropItemsContainer;
+        const itemsContent = this.elements.lastDropItems;
+        let scrollAmount = config.autoScrollValues.scrollAmount;
+        let scrollDirection = config.autoScrollValues.scrollDirection;
+        const scrollScalar = config.autoScrollValues.scrollScalar;
+        const pauseDuration = 5000;
+        function scrollContent(){
+            const maxScroll = itemsContent.scrollWidth - itemsContainer.clientWidth;
+            scrollAmount += scrollDirection * scrollScalar;
+            if (scrollAmount >= maxScroll || scrollAmount <= 0){
+                scrollDirection *= -1;
+                setTimeout(() => { // Pauses scrolling before switching directions
+                    requestAnimationFrame(scrollContent);
+                }, pauseDuration);
+                return;
+            }
+            itemsContainer.scrollLeft = scrollAmount;
+            requestAnimationFrame(scrollContent);
+        }
+        scrollContent();
+    }
+
     /**
      * Processes a new stage drop event when detected
      * @param {JSON} e event for the new 
@@ -433,21 +475,25 @@ class trackerController {
         let stageName = e.detail.stageName;
         /** @type {TableData} */
         let stageData = e.detail.stageData;
-        for (let tracker of this.trackers){
-            if (stageName != tracker.settings.selectedStage){continue;}
-            tracker.setLoot(stageData[this.dataPeriod]);
-            return;
-        }
 
+        // Sets last drop if it is enabled
         if (storageManager.settings.useLastDrop){ // Grabs last stageData row and adds it to the lastDrop section
+            // console.log("useLastDrop in settings was true, adding last drop to tracker controller");
             this.elements.lastDrop.style.display = "flex";
             this.elements.lastDropName.innerHTML = stageName;
             let lastDrop = stageData[stageData.length - 1];
             let itemList = lastDrop.itemList;
             this.elements.lastDropItems.innerHTML = "";
+            // console.log("Cleared lastDropItems and is now adding itemList: ", itemList)
             for (let item in itemList){
                 this.elements.lastDropItems.appendChild(lootBoxBuilder.buildLootBox(item, itemList[item], config.getFullLootUrl(item)))
             }
+        }
+
+        for (let tracker of this.trackers){
+            if (stageName != tracker.settings.selectedStage){continue;}
+            tracker.setLoot(stageData[this.dataPeriod]);
+            return;
         }
 
         if (!storageManager.settings.useUnlockedStage){return;}

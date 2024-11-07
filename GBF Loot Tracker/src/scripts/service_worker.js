@@ -4,17 +4,16 @@ var requestLogAll = [];
 
 /** @type {UrlRegexJson} */
 const urlRegex = {
-    gameUrlRegex: new RegExp("^https:\/\/game.granbluefantasy.jp"),
+    gameUrl: "^https:\/\/game.granbluefantasy.jp\/",
+    gameUrlRegex: undefined,
     extensionUrlRegex: new RegExp("^chrome:\/\/extensions\/|^chrome-extension:\/\/"),
 
-    // Stage results landing page URL
-    soloResultUrlRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/#result\/\\d{10}"),
-    raidResultUrlRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/#result_multi\/\\d{11}"),
-    resultUrlRegex: undefined,
-
     // Results file URL
-    soloRewardUrlRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/result\/content\/index\/\\d{10}"),
-    raidRewardUrlRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/resultmulti\/content\/index\/\\d{11}"),
+    soloRewardUrl: "result\/content\/index\/\\d{10}",
+    soloRewardUrlRegex: undefined,
+    raidRewardUrl: "resultmulti\/content\/index\/\\d{11}",
+    raidRewardUrlRegex: undefined,
+    soloOrRaidRewardUrl: undefined,
     rewardUrlRegex: undefined,
 
     // Sandbox URLs
@@ -23,18 +22,47 @@ const urlRegex = {
     sandboxGenesisRegex: new RegExp("^replicard\/stage\/10"),
 
     // Sandbox specific file URLs
-    sephiraStockRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/sephirabok_stock_list\\?_="),
-    sephiraOpenRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/open_sephirabox\\?_="),
-    xenoboxUrlRegex: new RegExp("^https:\/\/game.granbluefantasy.jp\/rest\/replicard\/stage\\?_=\\d{10}"),
+    sephiraOpenUrl: "rest\/replicard\/open_sephirabox\\?_=",
+    sephiraOpenRegex: undefined,
+    xenoboxUrl: "rest\/replicard\/stage\\?_=\\d{10}",
+    xenoboxUrlRegex: undefined,
+    sephiraOrXenoUrl: undefined,
+
+    // Event landing pages
+    tokenEventLandingUrl: "treasureraid\\d{3}\/top\/content\/newindex\\?_=",
+    tokenEventLandingRegex: undefined,
+    guildwarLandingUrl: "teamraid\\d{3}\/top\/content\/index\\?_=",
+    guildwarLandingRegex: undefined,
+    soloTreasureLandingUrl: "solotreasure\\d{3}\/top\/content\/newindex\\?_=",
+    soloTreasureLandingRegex: undefined,
+    eventLandingUrl: undefined,
+    eventLandingRegex: undefined,
+
+    // Network listener whitelist
+    whitelistUrl: undefined,
     whitelist: undefined,
 };
-// Defines any compound regex that are made of other smaller regex
-urlRegex.resultUrlRegex = new RegExp(urlRegex.soloResultUrlRegex.source + "|" + urlRegex.raidResultUrlRegex.source);
-urlRegex.rewardUrlRegex = new RegExp(urlRegex.soloRewardUrlRegex.source + "|" + urlRegex.raidRewardUrlRegex.source);
 
-urlRegex.whitelist = new RegExp(urlRegex.rewardUrlRegex.source + "|" + urlRegex.sephiraOpenRegex.source + "|" + urlRegex.xenoboxUrlRegex.source);
+urlRegex.gameUrlRegex = new RegExp(urlRegex.gameUrl);
+urlRegex.soloRewardUrlRegex = new RegExp(urlRegex.gameUrl + urlRegex.soloRewardUrl);
+urlRegex.raidRewardUrlRegex = new RegExp(urlRegex.gameUrl + urlRegex.raidRewardUrl);
+urlRegex.soloOrRaidRewardUrl = urlRegex.soloRewardUrl + "|" + urlRegex.raidRewardUrl;
+urlRegex.rewardUrlRegex = new RegExp(urlRegex.gameUrl + "(" + urlRegex.soloOrRaidRewardUrl + ")");
 
+urlRegex.sephiraOpenRegex = new RegExp(urlRegex.gameUrl + urlRegex.sephiraOpenUrl);
+urlRegex.xenoboxUrlRegex = new RegExp(urlRegex.gameUrl + urlRegex.xenoboxUrl);
+urlRegex.sephiraOrXenoUrl = urlRegex.sephiraOpenUrl + "|" + urlRegex.xenoboxUrl;
 
+urlRegex.tokenEventLandingRegex = new RegExp(urlRegex.gameUrl + urlRegex.tokenEventLanding);
+urlRegex.guildwarLandingRegex = new RegExp(urlRegex.gameUrl + urlRegex.guildwarLanding);
+urlRegex.soloTreasureLandingRegex = new RegExp(urlRegex.gameUrl + urlRegex.soloTreasureLandingUrl);
+urlRegex.eventLandingUrl = urlRegex.tokenEventLandingUrl + "|" + urlRegex.guildwarLandingUrl; // + "|" + urlRegex.soloTreasureLandingUrl;
+urlRegex.eventLandingRegex = new RegExp(urlRegex.gameUrl + "(" + urlRegex.eventLandingUrl + ")");
+
+// Remove comment below to enable the processing of event pages
+urlRegex.whitelistUrl = urlRegex.soloOrRaidRewardUrl + "|" + urlRegex.sephiraOrXenoUrl + "|" + urlRegex.eventLandingUrl;
+urlRegex.whitelist = new RegExp(urlRegex.gameUrl + "(" + urlRegex.whitelistUrl + ")");
+let testURL = "";
 Object.freeze(urlRegex);
 
 /** 
@@ -95,13 +123,14 @@ const StageSignature = {
         "Celeste Ater Omega" : [[],["612"],["30", "31", "46", "51", "106", "116", "610", "611", "5061"],[]],
         "Yggdrasil Arbos Omega": [[],["612"],["13", "21", "43", "49", "103", "113", "606", "607", "5031"],[]],
         "Leviathan Mare Omega": [[],["612"],["12", "20", "42", "48", "102", "112", "604", "605", "5021"],[]],
+        "Venerable Paragon": [[],["613", "614"],[],[]],
         "Shenxian": [["badge5"], [], [], []],
-
+        // "": [[],[],[],[]],
         /** QUEST TYPE 3 STAGES */
         "Exo Ifrit Crucible": [["1040118000", "10509"], [], [], []],
         "Exo Cocytus Crucible": [["1040516300", "10500"], [], [], []],
         "Exo Vohu Manah Crucible": [["1040218500", "1040119900", "10488", "10548"], [], [], []],
-        "Exo Sagittarius Crucible": [["1040712400", "10480"], [], [], []],
+        "Exo Sagittarius Crucible": [["1040712400", "1040026900", "10480", "10554"], [], [], []],
         "Exo Corow Crucible": [["1040618400", "10522"], [], [], []],
         "Exo Diablo Crucible": [["1040423200", "10543"], [], [], []],
     },
@@ -174,6 +203,8 @@ var activeDebuggers = [];
 /** - If loot with these IDs are dropped in a stage results, changes the extension icon */
 const changeIconOnId = ["215", "20004"];
 Object.freeze(changeIconOnId);
+/** How long the extension icon stays changed after a lucky drop. 300,000 ms = 5 minutes */
+const iconChangeDuration = 300000;
 /** All, Month, Week, Day */
 const dataPeriodLengths = [0, 2592000000, 604800000, 86400000];
 Object.freeze(dataPeriodLengths);
@@ -194,10 +225,49 @@ const defaultStageHeadRow = {
     kills: 0,
     lastIndex: 5,
     redChest: 0,
+    difficultySum: {},
 }
 Object.freeze(defaultStageHeadRow);
+const eventTypes = {
+    1: "treasureraid",
+}
+const tokensToDificulty = {
+    1: { // Token draw events
+        "honors": {},
+        "tokens": { // winning
+            15: "7", // Very Hard
+            16: "8", // Extreme
+            42: "10", // Impossible
+            100: "6", // Hell skip
+        }
+    },
+    3: { // Guild War
+        "honors": {},
+        "tokens": { // winning
+            22: "8", // Extreme Host
+            26: "9", // Extreme+ Host
+            45: "11", // Nightmare 90 Hosts
+            // The bosses above have join rewards of 20 so you cannot use join rewards to distinguish. 
+            // If a guild war raid has a join reward of 20, you must check instead for host rewards 
+            30: "12", // Nightmare 95
+            48: "13", // Nightmare 100
+            85: "14", // Nightmare 150
+            110: "15", // Nightmare 200
+            145: "16", // Nightmare 250
+        }
+    },
+    11: { // solotreasure
+        "honors": {
+            20000: "0", // Very Hard (solo)
+            75000: "2", // Extreme (solo)
+            150000: "4" // Maniac (solo)
+        },
+        "tokens": {}
+    }
+};
 /** Tracks when the custom timer was started */
 var timerStart = 0;
+var eventList = {};
 
 /**********************************/
 /* Listener and support functions */
@@ -332,28 +402,29 @@ class NetworkFilter {
         // If the event is a requestWillBeSent and the URL is from a loot results JSON...
         if (message == "Network.requestWillBeSent" && urlRegex.whitelist.test(params.request.url)) {
             console.log("%c[Step 1] RETRIEVING DATA", "color:coral;");
-            console.log("%c[1.1]Request found that matches file URL", "color:coral;");
+            // console.log("%c[1.1]Request found that matches file URL", "color:coral;");
             let fileType = "";
             // Decides what type of file this is
             if (urlRegex.rewardUrlRegex.test(params.request.url)) { fileType = "Battle Data" }
             else if (urlRegex.sephiraOpenRegex.test(params.request.url)) { fileType = "Sephira Results" }
             else if (urlRegex.xenoboxUrlRegex.test(params.request.url)) { fileType = "Xenobox" }
-            console.log("%c[1.2]detected requestWillBeSent from: " + params.request.url + " of type: " + fileType, "color:coral;");
+            else if (urlRegex.eventLandingRegex.test(params.request.url)) {fileType = "EventLanding"}
+            // console.log("%c[1.2]detected requestWillBeSent from: " + params.request.url + " of type: " + fileType, "color:coral;");
             trackedRequest = {
                 "requestId": params.requestId,
                 "tabId": debuggeeId.tabId,
                 "fileType": fileType,
                 "timestamp": Date.now(),
             };
-            requestLog.push([message, 0, params, debuggeeId.tabId]);
+            requestLog.push([message, params, debuggeeId.tabId]);
             return;
         }
         else if (params.requestId != trackedRequest.requestId) { return; }
-        requestLog.push([message, 0, params, debuggeeId.tabId]);
+        requestLog.push([message, params, debuggeeId.tabId]);
         if (message == "Network.loadingFinished") {
-            console.log("%c[1.3]loadingFinished event matched requestId. Congrats!", "color:coral;");
+            // console.log("%c[1.3]loadingFinished event matched requestId. Congrats!", "color:coral;");
             await NetworkFilter.sendCommandPromise(debuggeeId.tabId, params).then((response) => {
-                console.log("%c[1.4]Succeeded in getting data!", "color: coral;");
+                // console.log("%c[1.4]Succeeded in getting data!", "color: coral;");
                 console.log("%c[info]Message chain for retrieved file", "color:coral;", requestLog);
                 switch (trackedRequest.fileType) {
                     case "Battle Data":
@@ -365,6 +436,9 @@ class NetworkFilter {
                     case "Xenobox":
                         DataProcessor.ProcessXenoboxJSON(response);
                         break;
+                    case "EventLanding":
+                        DataProcessor.ProcessEventLanding(response);
+                        break;
                     default:
                         console.log("%c[error]fileType did not match any known values: " + trackedRequest.fileType, "color:red;");
                         break;
@@ -372,7 +446,7 @@ class NetworkFilter {
 
                 requestLog = [];
             }).catch((error) => {
-                console.log("%cError occured fetching loot data file: ", error, "color:red;");
+                console.log("%cError occured fetching loot data file: ", "color:red;", error);
             });
         }
     }
@@ -430,15 +504,15 @@ class DataProcessor {
             /** @type {ResultData} */
             var resultData = resultInfo.option.result_data;
             console.log("%c[2.1]Result data: ", "color:cornflowerblue;", resultData);
-            // var rewardList = body.rewards.reward_list;
-            // console.log("%c[2.1]Parsed rewards list:", "color:cornflowerblue;", rewardList);
+            
             // Build row to send
             var tableEntry = DataProcessor.BuildTableEntry(resultData);
             // Temporarily changes extension icon if loot contained any special items (sand/bars)
             Object.keys(tableEntry.itemList).some(r => (changeIconOnId.includes(r) && setIconAction(r)))
             // Finds the enemy name
-            var enemyName = DataProcessor.FindEnemyName(tableEntry.itemList, resultData.quest_type, resultData.url)
+            var enemyName = DataProcessor.FindEnemyName(tableEntry.itemList, resultData);
             if (enemyName == "Unknown" || enemyName == undefined) { console.log("%c[!]Enemy was " + enemyName, "color:orange;"); return; }
+            else if (typeof enemyName == "object"){tableEntry.difficulty = enemyName[1]; enemyName = enemyName[0]}
             console.log("%c[2.5]Enemy name found: " + enemyName, "color:cornflowerblue;");
             DataProcessor.StoreRow(enemyName, tableEntry);
         }
@@ -507,6 +581,171 @@ class DataProcessor {
         }
         catch (error) { console.log("%c[error]An error occured in ProcessXenoboxJSON: ", "color:red;", error); }
     }
+    
+    /**
+     * 
+     * @param {*} response 
+     * @param {string} requestUrl 
+     * @returns 
+     */
+    static ProcessEventLanding(response){
+        var eventDetails = {};
+        // console.log(eventList);
+        // strings that appear in the reponse just before the parsed values
+        const titleLocation = `<input type="hidden" id="title" value="`;
+        const eventIdLocation = `<input type="hidden" id="event_id" value="`
+        const drawboxLocation = `<div class="prt-gacha-infomation" data-box-num="`;
+        const tokenCountLocation = `txt-gacha-point'>`;
+        const honorCountLocation = `class="txt-point">`;
+        const eventItemLocation = `prt-article-count num">Held:<span class="txt-article-num">`;
+        const silverMedalLocation = `<div class="prt-medal-thumb2">`;
+        const goldMedalLocation = `<div class="prt-medal-thumb3">`;
+        const itemIdLocation = `<div class="prt-temp-item btn-temp-item" data-item-id="`;
+        
+        // Processes response.body to get the tokens and honors held by the player     
+        let body = JSON.parse(response.body);
+        let bodyData = body.data;
+        const bodyDataString = decodeURIComponent(bodyData);
+
+        const titleOffset = bodyDataString.indexOf(titleLocation) + titleLocation.length;
+        if (titleOffset >= 0){eventDetails.EventTitle = bodyDataString.substring(titleOffset, bodyDataString.indexOf("\"", titleOffset));}
+
+        if (eventDetails.EventTitle == "Unite and Fight"){
+            DataProcessor.ProcessGuildWarLanding(bodyDataString);
+            return;
+        }
+
+        const eventId = DataProcessor.GetNumberAfterString(bodyDataString, eventIdLocation);
+        if (eventId.length < 4){console.log("Error, eventId was not at least length 4"); return;}
+        eventDetails.EventId = eventId;
+        eventDetails.EventNum = eventId.substring(eventId.length - 3);
+        const drawbox = DataProcessor.GetNumberAfterString(bodyDataString, drawboxLocation);
+        if (drawbox != "0"){eventDetails.Drawbox = drawbox;}
+        const tokenTotal = DataProcessor.GetNumberAfterString(bodyDataString, tokenCountLocation);
+        if (tokenTotal != "0"){eventDetails.EventTokens = tokenTotal;}
+        const honorsTotal = DataProcessor.GetNumberAfterString(bodyDataString, honorCountLocation);
+        if (honorsTotal != "0"){eventDetails.Honors = honorsTotal;}
+        const silverMedalTotal = DataProcessor.GetNumberAfterString(bodyDataString, silverMedalLocation);
+        if (silverMedalTotal != "0"){eventDetails.SilverMedals = silverMedalTotal;}
+        const goldMedalTotal = DataProcessor.GetNumberAfterString(bodyDataString, goldMedalLocation);
+        if (goldMedalTotal != "0"){eventDetails.GoldMedals = goldMedalTotal;}
+        if (body?.option?.progress){
+            const progString = decodeURIComponent(body.option.progress);
+            const eventItemId = DataProcessor.GetNumberAfterString(progString, itemIdLocation);
+            if (eventItemId != "0"){eventDetails.EventItemId = [eventItemId];}
+        }
+        // response.body.option.quest.list contains the number of special items used to start stages currently held by the player
+        var itemTotal = "0";
+        if (body?.option?.quest?.list){
+            var eventItemString = decodeURIComponent(body.option.quest.list);
+            itemTotal = DataProcessor.GetNumberAfterString(eventItemString, eventItemLocation);
+            if (itemTotal != "0"){eventDetails.BaitChunks = itemTotal;}
+        }
+
+        
+        // Event items for solo treasure events
+        if (body?.option?.status?.article_item){
+            let keyOrder = ["EventItem1", "EventItem2", "EventItem3"];
+            let soloTreasureArray = body?.option?.status?.article_item;
+            keyOrder.forEach((key, i) => {
+                if (soloTreasureArray.length > i && typeof soloTreasureArray[i]?.possessed == "string"){eventDetails[key] = soloTreasureArray[i].possessed}
+            })
+
+        }
+        if (eventDetails?.EventTitle != "unknown"){
+            DataProcessor.UpdateEventStageInfo(eventDetails);
+        }
+        else {console.log("event title was unknown...", eventDetails)}
+        // console.log(body);
+        // console.log(bodyDataString);
+        console.log(eventDetails);
+    }
+
+    static ProcessGuildWarLanding(bodyDataString){
+        // console.log(bodyDataString);
+        const eventNumLocation = `data-href="event/teamraid`;
+        const baitChunkLocation = `class="ico-triggeritem-special"`;
+        const maliciousClumpLocation = `class="ico-triggeritem-ultimate"`;
+        const honorSumLocation = `Total Honors</div><div class="txt-total-record"><em>`
+        const honorDailyLocation = `Daily Honors</div><div class="txt-total-record"><em>`
+        const chestCountLocation = `Chests found:</div><div class="txt-event-data"><em>`
+        const tokenCountLocation = `Tokens held:</div><div class="txt-event-data"><em>`;
+
+        const eventType = "3";
+        const eventNum = DataProcessor.GetNumberAfterString(bodyDataString, eventNumLocation);
+        const eventId = eventType + eventNum;
+        const title = "Unite and Fight " + eventNum;
+        const baitChunkTotal = DataProcessor.GetNumberAfterString(bodyDataString, baitChunkLocation);
+        const maliciousClumpTotal = DataProcessor.GetNumberAfterString(bodyDataString, maliciousClumpLocation);
+        const honorsSumTotal = DataProcessor.GetNumberAfterString(bodyDataString, honorSumLocation);
+        const honorDailyTotal = DataProcessor.GetNumberAfterString(bodyDataString, honorDailyLocation);
+        const chestTotal = DataProcessor.GetNumberAfterString(bodyDataString, chestCountLocation);
+        const tokenTotal = DataProcessor.GetNumberAfterString(bodyDataString, tokenCountLocation);
+        console.log(`Event had the following properties: \nEventTitle: ${title}, EventId: ${eventId}, EventNum: ${eventNum}, 
+            EventTokens: ${tokenTotal}, ChestsDropped: ${chestTotal}, 
+            TotalHonors: ${honorsSumTotal}, DailyHonors: ${honorDailyTotal},
+            BaitChunks: ${baitChunkTotal}, MaliciousClumps: ${maliciousClumpTotal}`);
+        const eventDetails = {
+            EventTitle: title,
+            EventId: eventId, 
+            EventNum: eventNum, 
+            EventTokens: tokenTotal, 
+            BaitChunks: baitChunkTotal, 
+            MaliciousClumps: maliciousClumpTotal, 
+            TotalHonors: honorsSumTotal,
+            DailyHonors: honorDailyTotal,
+            Chests: chestTotal, 
+        }
+        DataProcessor.UpdateEventStageInfo(eventDetails);
+    }
+
+    static async UpdateEventStageInfo(eventDetails){
+        console.log("Updating event info...");
+        if (!eventDetails?.EventTitle || eventDetails.EventTitle == "unknown"){console.log("EventTitle didn't exist or was 'unknown'...");return;}
+        let eventTable = await storageProxy.get(eventDetails.EventTitle);
+        if (!eventTable){
+            let defaultHead = structuredClone(defaultStageHeadRow);
+            defaultHead.extraInfo = eventDetails;
+            eventTable = [];
+            for (let i = 0; i <= 4; i++) {
+                eventTable[i] = Object.assign({}, defaultHead);
+            }
+        }
+        else {
+            for (let i = 0; i <= 4; i++) {
+                eventTable[i].extraInfo = eventDetails;
+            }
+        }
+        console.log(`Updating event info for ${eventDetails.EventTitle} to `, eventDetails, ". Updated table is:", eventTable)
+        storageProxy.save({[eventDetails.EventTitle]: eventTable});
+        eventList[eventDetails.EventId] = eventDetails;
+        console.log("eventlist updated: ", eventList);
+        storageProxy.save({["eventList"]: eventList});
+    }
+
+    /**
+     * 
+     * @param {string} inputString 
+     * @param {string} searchString 
+     * @param {boolean} [debug=false] 
+     * @returns 
+     */
+    static GetNumberAfterString(inputString, searchString, debug = false){
+        const locationOffsetStart = inputString.indexOf(searchString);
+        if (locationOffsetStart < 0){return "0"}
+        const locationOffset = locationOffsetStart + searchString.length;
+        inputString = inputString.substring(locationOffset); // Trims front of string to start at the number
+        let parsedNumber = "";
+        for (let i = 0; i < inputString.length; i++){
+            let c = inputString[i];
+            if (debug) console.log(`Current char: ${c} current number: ${parsedNumber}`);
+            if (c >= '0' && c <='9'){parsedNumber += c;}
+            else if (c == ',') continue;
+            else if (parsedNumber.length > 0) {break;}
+        };
+        if (parsedNumber.length == 0){parsedNumber = "0"}
+        return parsedNumber;
+    }
 
     /**
      * Processes the ResultData JSON into a TableEntry
@@ -551,6 +790,9 @@ class DataProcessor {
                 else if (item.item_kind == 49) {
                     itemCount = item.id;
                     item.id = "90001"
+                }
+                else if (item.item_kind == 82){
+                    item.id = item.id[item.id.length-2] // Gets second last char of id string which would be either a gold or silver badge
                 }
                 var itemId = itemType + item.id;
                 /**
@@ -609,6 +851,8 @@ class DataProcessor {
                 return "box";
             case 73: // Rings + Earrings
                 return "emp"; 
+            case 82: // The gold and silver badges from event raids
+                return "medal";
             case 88: // Plus Marks
                 return "bonus";
             case 91: // Paladin Shields
@@ -665,9 +909,16 @@ class DataProcessor {
      * - 25 => sandbox, 
      * - ext... 
      * @param {string} url 
-     * @returns {string}
+     * @returns {string | string[2]}
      */
-    static FindEnemyName(lootList, quest_type, url) {
+    static FindEnemyName(lootList, resultData) {
+        var quest_type = resultData.quest_type;
+        var url = resultData.url;
+
+        const eventData = DataProcessor.FindEventEnemyName(lootList, resultData);
+        console.log("Result of eventData: ", eventData);
+        if (eventData != "Unknown"){return eventData;}
+
         console.log("DEBUG FROM FindEnemyName(): ", lootList, quest_type, url);
         console.log("%c[2.4]Finding enemy name", "color:cornflowerblue;");
         /** A list of all lootIds obtained from the stage results */
@@ -746,12 +997,83 @@ class DataProcessor {
     }
 
     /**
+     * 
+     * @param {*} resultData 
+     * @returns {string[2]}
+     */
+    static FindEventEnemyName(lootList, resultData) {
+        // 1) Checks input is valid
+        if (!resultData?.event){return "Unknown"}
+        const eventInfo = resultData.event;
+        if (!eventInfo?.event_id || !eventInfo?.event_type || !eventInfo?.data){return "Unknown"}
+        const eventId = eventInfo.event_id;
+        const eventType = eventInfo.event_type;
+        /** @type {object[]} */
+        const eventData = eventInfo.data;
+        console.log(`Drop came from event with event id: ${eventId}`);
+        if (!eventList.hasOwnProperty(eventId)){
+            console.log(`%cError, event with event id "${eventId}" was not indexed...`, "color:red;");
+            return "Unknown";
+        }
+        const eventName = eventList[eventId].EventTitle;
+        console.log("Extracting event battle info...\n EventData: ", eventData);
+        // 2) Extracts honors and token data
+        var totalHonors = eventData.filter((obj) => {return obj?.name == "honors";});
+        totalHonors = totalHonors.length > 0 && typeof totalHonors[0]?.get_num == "number" ? totalHonors[0].get_num : 0;
+        const tokenArr = eventData.filter((obj) => {return typeof obj?.name == "string" && obj.name.includes("tokens");});
+        const tokenSum = tokenArr.reduce((sum, obj) => {
+                if (typeof obj?.get_num == "number") {return sum + obj?.get_num;}
+                return sum;
+            }, 0);
+        var tokenWinning = eventData.filter((obj) => {return (obj?.reward_type && obj.reward_type === "winning")});
+        tokenWinning = tokenWinning.length > 0 && typeof tokenWinning[0]?.get_num == "number" ? tokenWinning[0].get_num : 0;
+        var eventDifficulty = "Unknown";
+        console.log(`Total Honors: ${totalHonors}, Total Tokens: ${tokenSum}, Victory Tokens: ${tokenWinning}`);
+        // 3) Adds token and honor sum to event list
+        if (typeof totalHonors == "number"){
+            if (eventList[eventId]?.TotalHonors) {eventList[eventId].TotalHonors = String(+eventList[eventId].TotalHonors + totalHonors);}
+            if (eventList[eventId]?.DailyHonors) {eventList[eventId].DailyHonors = String(+eventList[eventId].DailyHonors + totalHonors);}
+        }
+        if (typeof tokenSum == "number" && eventList[eventId]?.EventTokens){
+            eventList[eventId].EventTokens = String(+eventList[eventId].EventTokens + tokenSum);
+        }
+        // 4) Extracts difficulty using data
+        if (!tokenSum || tokenSum <= 0) { // Event battle did not contain tokens so it was a solo battle
+            if (!tokensToDificulty.hasOwnProperty(eventType)){console.log(`Error, event of type ${eventType} is not tracked by FindEnemyEventName`); return "Unknown";}
+            eventDifficulty = tokensToDificulty[eventType].honors[totalHonors];
+            if (eventDifficulty){return [eventName, eventDifficulty];}
+            return "Unknown";
+        }
+        // Event was a raid and not a solo battle
+        if (+eventType == 3 && tokenWinning == 20){ // Special case where the guild war boss could be either Extreme, Extreme+ or Nightmare 90...
+            tokenWinning = eventData.filter((obj) => {return (obj?.reward_type && obj.reward_type === "starting the battle")})[0].get_num;
+            console.log("Token count was calculated with being host because of special conditions being met...\n New token count: " + tokenCount);
+        }
+        
+        eventDifficulty = tokensToDificulty[eventType].tokens[tokenWinning];
+        // Checks if enemy is a golden tyrant by seeing if battle is an extreme|extreme+ gw fight with at least 30 bait chunks dropped
+        if (+eventType == 3 && (eventDifficulty == "8" || eventDifficulty == "9")){
+            if (lootList.hasOwnProperty("10116") && lootList[10116] >= 30){
+                eventDifficulty = "10" + eventDifficulty;
+            }
+        }
+        if (eventDifficulty == undefined || eventDifficulty.length == 0) return "Unknown";
+        return [eventName, eventDifficulty];
+    }
+
+    /**
      * Stores a new entry in a stage's table. If a stage doesn't have a table yet, it constructs one
      * @param {string} key The name of the stage the TableEntry will be stored in
      * @param {TableEntry} value The TableEntry that will be stored
      */
     static async StoreRow(key, value) {
         console.log("%c[2.6]Storing table entry", "color:cornflowerblue;");
+        // Checks if event is stored in eventList
+        let eventInfo = {};
+        for (let eventId in eventList){if (eventList[eventId]?.EventTitle == key){
+            eventInfo = eventList[eventId];
+            break;
+        }}
         /** @type {JSON[] | null} An array containing the table before the new row is added */
         var table = await storageProxy.get(key);
         // Builds new table if it does not exist
@@ -759,11 +1081,14 @@ class DataProcessor {
             console.log("%c[!]Table was not found. Building new table...", "color:orange;")
             table = new Array();
             // Creates 5 header rows for the table using data from the stage's first entry
-            var defaultHead = Object.assign({}, value);
-            // Adds killcount + lastIndex and deletes epochTime field from header rows
+            var defaultHead = structuredClone(defaultStageHeadRow);
             defaultHead.kills = 1;
+            defaultHead.blueChest = value.blueChest;
+            defaultHead.redChest = value.redChest;
+            defaultHead.extraChest = value.extraChest;
+            defaultHead.itemList = value.itemList;
+            if (value?.difficulty){defaultHead.difficultySum[value.difficulty] = 1}
             defaultHead.lastIndex = 5;
-            delete defaultHead["epochTime"];
             // Builds table with 5 rows containing values from first kill
             // Rows in order are stored Total, Monthly, Weekly, Daily, Timer
             for (let i = 0; i <= 4; i++) {
@@ -775,14 +1100,21 @@ class DataProcessor {
         else {
             for (let i = 0; i <= 4; i++) {
                 if(!table[i].hasOwnProperty("kills")){table[i].kills = 0;}
-                table[i].kills += 1;
                 if(!table[i].hasOwnProperty("blueChest")){table[i].blueChest = 0;}
-                table[i].blueChest += value.blueChest;
                 if(!table[i].hasOwnProperty("redChest")){table[i].redChest = 0;}
-                table[i].redChest += value.redChest;
                 if(!table[i].hasOwnProperty("extraChest")){table[i].extraChest = 0;}
+                table[i].kills += 1;
+                table[i].blueChest += value.blueChest;
+                table[i].redChest += value.redChest;
                 table[i].extraChest += value.extraChest;
                 table[i].itemList = addItemList(table[i].itemList, value.itemList);
+                if (value?.difficulty){
+                    if (table[i].difficultySum.hasOwnProperty(value.difficulty))
+                        table[i].difficultySum[value.difficulty]++;
+                    else
+                        table[i].difficultySum[value.difficulty] = 1;
+                }
+                if (eventInfo != {} && table[i]?.extraInfo){table[i].extraInfo = eventInfo}
             }
         }
 
@@ -836,6 +1168,7 @@ class DataProcessor {
                 targetRow.redChest -= stageData[index].redChest;
                 targetRow.extraChest -= stageData[index].extraChest;
                 targetRow.kills--;
+                if (stageData[index]?.difficulty){targetRow.difficultySum[stageData[index].difficulty]--}
                 targetRow.itemList = subtractItemList(targetRow.itemList, stageData[index].itemList);
                 index++;
                 targetRow.lastIndex = index;
@@ -850,14 +1183,23 @@ class DataProcessor {
         const sizeOfArray = stageData.length
         if (sizeOfArray <= 5){return stageData;}
         let stageDataSum = structuredClone(defaultStageHeadRow);
+        // If the stage has extra info (Token draw events, guild war, ext...) copies that info over as well
+        if (stageData[0].hasOwnProperty("extraData")) {
+            stageDataSum.extraData = stageData[0].extraData;
+        }
         // Sums up all data in dataRows into stageDataSum
         for(let i = 5; i < sizeOfArray; i++){
             if (stageData[i].hasOwnProperty("redChest")){stageDataSum.redChest += stageData[i].redChest;}
             if (stageData[i].hasOwnProperty("blueChest")){stageDataSum.blueChest += stageData[i].blueChest;}
             if (stageData[i].hasOwnProperty("extraChest")){stageDataSum.extraChest += stageData[i].extraChest;}
             if (stageData[i].hasOwnProperty("itemList")){stageDataSum.itemList = addItemList(stageDataSum.itemList, stageData[i].itemList);}
+            if (stageData[i].hasOwnProperty("difficulty")){
+                if (stageDataSum.difficultySum.hasOwnProperty(stageData[i].difficulty)){stageDataSum.difficultySum[stageData[i].difficulty]++}
+                else {stageDataSum.difficultySum[stageData[i].difficulty] = 1}
+            }
             stageDataSum.kills++;
         }
+
         // Sets all header rows to have the full sum of all data
         for(let i = 0; i < 5; i++){
             stageData[i] = structuredClone(stageDataSum);
@@ -928,6 +1270,9 @@ class StorageProxy{
     }
 
     async save(obj){
+        /** Updates local values if the values in perminent storage change */
+        if (obj?.Settings?.timerStart){timerStart = obj.Settings.timerStart;}
+        else if (obj?.eventList){eventList = obj.eventList;}
         this.writeRequestQueue.push(obj);
         if (!this.writeProtectFlag){this.processRequest();}
     }
@@ -1016,7 +1361,6 @@ function handleMessage(request, sender, sendResponse) {
                 return;
             }
             /** If settings were changed, updates the time the last tracker timer was set. This is used for balancing stage data */
-            if (params.data.hasOwnProperty("Settings") && params.data.Settings.hasOwnProperty("timerStart")){timerStart = params.data.Settings.timerStart;}
             storageProxy.save(params.data);
             sendResponse({ response: "Added data to write queue" });
             break;
@@ -1089,12 +1433,38 @@ async function CheckForUpdate() {
         });
 }
 
+// Stores the timeout to revert the extension icon
+var setIconActionTimeout;
+/**
+ * Changes the extension icon to any lucky drop you may get
+ * @param {string} iconId 
+ */
+function setIconAction(iconId){
+  if (iconId == "reset"){var imagePath = "/src/img/icon.png"}
+  else{
+    if (!changeIconOnId.includes(iconId)){console.log("%c[error]Invalid ID for extension icon: " + iconId, "color:red;"); return;};
+    var imagePath = "/src/img/icon/luckyIcons/" + iconId + ".jpg"
+    // Resets the extension icon to default after iconChangeDuration (ms). Default is 300,000ms = 5 minutes
+    setIconActionTimeout = setTimeout(setIconAction, iconChangeDuration, "reset")
+  }
+  chrome.action.setIcon({
+    path: {
+      "16": imagePath,
+      "48": imagePath,
+      "128": imagePath
+    }
+  }).then(console.log("%c[+]Extension icon changed to: " + imagePath, "color:#AFC8AD;"));
+}
+
 const storageProxy = new StorageProxy();
 
 async function InitializeServiceWorker() {
-    var settings = await storageProxy.get("Settings");
-    if (settings == undefined || !settings.hasOwnProperty("timerStart")){console.log("ERROR: settings did not have timerStart property set")}
-    else {timerStart = settings.timerStart;}
+    var Settings = await storageProxy.get("Settings");
+    var EventList = await storageProxy.get("eventList");
+    if (Settings == undefined || !Settings?.timerStart){console.log("ERROR: settings did not have timerStart property set");}
+    else {timerStart = Settings.timerStart;}
+    if (EventList == undefined){console.log("ERROR: eventList did not exist in local storage");}
+    else {eventList = EventList;}
     CheckForUpdate();
     DebuggerManager.EnableEventListeners();
     chrome.runtime.onMessage.addListener(handleMessage);

@@ -1,3 +1,8 @@
+@font-face {
+    font-family: "FOT-テロップ明朝 Pro D";
+    src: url('./fonts/basic.woff') format('woff')
+}
+
 header{width: 100%;}
 
 div#header {
@@ -45,7 +50,7 @@ body {
     width: 100%;
     background-image: -webkit-linear-gradient(left, #88aeb7 0%,#b8d0d3 5%,#cfe8eb 20%,#d2d4cf 80%,#c7cebd 95%,#afc1c5 100%);
     background-attachment: fixed;
-    font-family: "FOT-テロップ明朝 Pro D","Average Sans",sans-serif;
+    font-family: "FOT-テロップ明朝 Pro D", "Average Sans" ,sans-serif;
     font-size: 100%;
 }
 

@@ -3,9 +3,7 @@ div#c-trackerController {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 32em;
-    max-width: 100%;
-    width: max-content;
+    width: 100%;
     margin: 0em auto;
 }
 
@@ -14,7 +12,7 @@ div#c-trackerController {
     display: flex;
     flex-direction: column;
     min-width: 48em;
-    width: 98%;
+    width: 80%;
     min-height: 4em;
     margin: 0.2em auto;
     border-image: url(../img/background/itemBackground.jpg) 6 6 fill;
@@ -45,12 +43,18 @@ div#c-trackerController {
     max-height: 4em;
     align-items: center;
 }
-#trackerLastDropItems{
+#c-trackerLastDropItems{
     display: flex;
     flex-direction: row;
     max-height: 5em;
     height: fit-content;
-    flex-wrap: nowrap;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+#trackerLastDropItems{
+    display: flex;
+    white-space: nowrap;
 }
 
 .tracker-controller-head-button{
@@ -89,14 +93,13 @@ div#trackerControllerBody {
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 20em;
     height: max-content;
     max-width: 29em;
     width: 29em;
     border-image: url(../img/background/moduleBackgroundClipped.png) 25 25 fill;
     border-width: 1.5em;
     border-style:groove;
-    margin: 0em 0.5em 1em 0.5em;
+    margin: 2em 0.5em 1em 0.5em;
     z-index: 2;
 }
 
@@ -107,12 +110,20 @@ div#trackerControllerBody {
     justify-content: center;
     align-items: center;
     background: url(../img/background/bossTitleBackground.png) no-repeat center;
-    max-height: 4em;
-    height: 4em;
-    background-size: 90% 4em;
+    position: absolute;
+    top: -2.75em;
+    max-height: 3em;
+    height: 3em;
+    width: 100%;
+    background-size: 100% 3em;
+    scale: 110%;
     background-position-y: top;
 }
-
+.tracker-stage-title-text{
+    color: white;
+    font-size: 1em;
+    padding-bottom: 0.15em;
+}
 /*Box that holds info about the stage*/
 .tracker-info{
     display: flex;
@@ -155,19 +166,31 @@ div#trackerControllerBody {
 /*Box for a type of drop*/
 .tracker-loot{
     display: flex;
+    position: relative;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    margin-top: 1em;
+    padding: 0.34em 0.22em;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 0.3em;
 }
 /*Name of the type of drop*/
 .tracker-loot-title{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: url(../img/background/lootTitleBackground.png) no-repeat center;
-    background-size: 55%;
-    width: 100%;
-    height: 3em;
+    position: absolute;
+    top: -0.80em;
+    left: 0em;
+    height: 1em;
+    background-color: gold;
+    padding: 0 0.25em 0.1em 0.25em;
+    border-radius: 0.3em;
+    line-height: 0.75em;
+}
+.tracker-loot-title-text{
+    font-size: 0.75em;
+    color: black;
 }
 /*Box that all drops of that type go into*/
 .tracker-loot-drops{
@@ -176,13 +199,15 @@ div#trackerControllerBody {
     flex-wrap: wrap;
     grid-auto-flow: row;
     width: 100%;
+    min-height: 4em;
     height: max-content;
 }
 /*Stores the loot image and text*/
 .tracker-loot-box{
-    width: 7em;
-    height: 4em;
+    width: 6.8em;
+    height: 3.8857em;
     margin: 0.12em;
+    flex-shrink: 0;
     background: no-repeat center;
     background-size: cover;
     position: relative;
@@ -194,17 +219,16 @@ div#trackerControllerBody {
     bottom: 0;
     right: 0;
     position: absolute;
-    padding: 0em 0.2em;
+    padding: 0em 0.3em 0.25em 0.3em;
     color: white;
-    background-color: rgba(0,0,0,0.4);
-    border-radius: 10%;
     border-radius: 10% 0 0 0;
+    text-shadow: 1px 1px 2px black, 0 0 25px saddlebrown, 0 0 5px gray;
+    line-height: 1.2em;
 }
 .tracker-loot-multi{
-    margin: 0;
-    bottom: -0.3em;
     position: relative;
-    font-size: 0.9em;
+    font-size: 0.8em;
+    bottom: -0.25em;
 }
 /*Text for how many items there are*/
 .tracker-loot-count{
@@ -260,6 +284,62 @@ div#trackerControllerBody {
 .tracker-xeno-box-info{
     display: flex;
     flex-direction: column;
+}
+
+.tracker-event-info{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    grid-auto-flow: row;
+    width: 100%;
+    justify-content: space-between;
+    margin: 0.2em 0em
+}
+.c-tracker-event-item{
+    display: none;
+    width: 50%;
+}
+.tracker-event-item{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0.1em 0.5em;
+}
+.tracker-event-text{
+    color: white;
+}
+.tracker-event-count{
+    color: white;
+}
+
+.tracker-guild-war{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0.5em 0em;
+}
+.tracker-guild-war-row{
+    width: 100%;
+    margin: 0.25em 0em;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: row;
+}
+.tracker-guild-war-item{
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+.tracker-guild-war-image{
+    width: 4em;
+    height: 4em;
+    background: no-repeat center;
+    background-size: cover;
+}
+.tracker-guild-war-count{
+    color: white;
 }
 
 .tracker-remove-clickbox{

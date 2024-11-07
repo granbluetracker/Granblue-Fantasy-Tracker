@@ -24,7 +24,7 @@ class trackerInstance{
      * @returns 
      */
     constructor(selectedStage, lootData, stageType = "0") {
-        console.log("Building tracker with params: selectedStage: " + selectedStage + " stageType: " + stageType + " lootData: ", lootData);
+        // console.log("Building tracker with params: selectedStage: " + selectedStage + " stageType: " + stageType + " lootData: ", lootData);
         /** @type {trackerSettings} */
         var settings = {};
         settings.stageType = stageType;
@@ -65,6 +65,18 @@ class trackerInstance{
             return;
         }
         this.setStats(lootData);
+        if (this.elements.guildWar != undefined && lootData?.extraInfo){
+            this.setGuildWarInfo(lootData.extraInfo);
+            // Removes event items from loot data since it likely doesn't have a stored image
+            if (lootData.extraInfo?.EventItemId) {
+                lootData.extraInfo.EventItemId.forEach((value) => {
+                    if (lootData.itemList.hasOwnProperty(value))delete lootData.itemList[value];
+                });
+            }
+        }
+        if (this.elements.bossCounts != undefined && lootData?.difficultySum){
+            this.setBossCounts(lootData.difficultySum);
+        }
         // Extracts itemlist from lootData
         let itemList = lootData.itemList;
         // Unhides lucky loot section if any loot is lucky
@@ -144,6 +156,31 @@ class trackerInstance{
             }
         }
     }
+    setBossCounts(difficultySum){
+        const maxSize = 17;
+        console.log("DificultySum: ", difficultySum);
+        let bossCounts = this.elements.bossCounts;
+        if (bossCounts.length != maxSize){console.log("ERROR bossCounts element was not " + maxSize); return;}
+        // Merges golden boss varients with normal versions
+        for (let key in difficultySum){
+            if (+key >= 100){
+                let goldenElement = "<span style=\"color: gold\">(" + difficultySum[key] + ")</span>"
+                var nonGoldIndex = +key - 100;
+                if (difficultySum.hasOwnProperty(key)){difficultySum[nonGoldIndex] = difficultySum[nonGoldIndex] + " + " + goldenElement}
+                else {difficultySum[nonGoldIndex] = goldenElement}
+                delete difficultySum[key];
+            }
+        }
+        for (let key in difficultySum){
+            if (+key < 0 || +key >= maxSize){
+                console.log("ERROR: Boss difficulty not in range of valid difficulty IDs...");
+                console.log(`Expected between 0 and ${maxSize}, instead recieved: ${key}`);
+                continue;
+            }
+            bossCounts[+key].innerHTML = String(difficultySum[key]);
+            bossCounts[+key].parentElement.parentElement.style.display = "flex";
+        }
+    }
     setStats(lootData){
         if (this.elements.killsRow == undefined){
             // console.log("Error, killsRow was not found in tracker with settings: ", this.settings);
@@ -168,6 +205,29 @@ class trackerInstance{
             this.elements.extraChestRow.classList.remove("hidden");
         }
         else{this.elements.extraChestRow.classList.add("hidden");}
+    }
+    setGuildWarInfo(extraInfo){
+        console.log(extraInfo);
+        var trackedKeys = ["Chests", "EventTokens", "EventItem1", "EventItem2", "EventItem3", "GoldMedals", "SilverMedals", "BaitChunks", 
+            "MaliciousClumps", "Honors", "TotalHonors", "DailyHonors", "CrewHonors", "EnemyHonors",];
+        // Adds commas to numbers and adds them to the tracker
+        for (let key of trackedKeys){
+            if (!extraInfo.hasOwnProperty(key) || extraInfo[key] == "0" || extraInfo[key] == 0){continue;}
+            var value = extraInfo[key];
+            let displayStr = "";
+            let count = 3
+            for (let i = value.length-1; i >= 0; i--){
+                if (count == 0){
+                    displayStr = "," + displayStr;
+                    count = 3;
+                }
+                displayStr = value.charAt(i) + displayStr;
+                count--;
+            }
+            if (!this.elements.guildWar.hasOwnProperty(key)){console.log(`Error, this.elements.guildWar did not have property ${key}`); continue;}
+            this.elements.guildWar[key].innerHTML = displayStr;
+            this.elements.guildWar[key].parentElement.style.display = "flex";
+        }
     }
     clearLoot(lootData){throw new Error('Abstract method called')}
     /**

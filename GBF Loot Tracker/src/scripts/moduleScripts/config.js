@@ -191,6 +191,13 @@ class config {
                     "lucky": "2"
                 }
             },
+            "Mastery Trials": {
+                "Venerable Paragon":{
+                    "alius": "Martial Mastery Trial",
+                    "element": "4",
+                    "lucky": "2",
+                }
+            },
             "High Difficulty": {
                 "Super Ultimate Bahamut": {
                     "alius": "subhl",
@@ -425,13 +432,17 @@ class config {
                 },
             }
         },
-        "Story Events": {
+        "Event Stages": {
 
         },
         "Skip Battles": {
 
         },
+        "Guild War": {
+
+        },
     }
+    eventStageInfo = [];
     validStageNames = [];
     elementColors = [
         "#bf371a", "#357ed4", "#855327", "#4b962a", "#d4b62b", "#7b49ca", "#696969",
@@ -442,6 +453,9 @@ class config {
     defaultAssetUrls = {
         lootPath : "url(./img/loot/",
         defaultLootImage : "url(./img/loot/default.jpg)",
+        defaultSSRImage : "url(./img/loot/defaultSSR.jpg)",
+        defaultSRImage : "url(./img/loot/defaultSR.jpg)",
+        defaultEventLootImage : "url(./img/loot/default.jpg)",
         bossPath : "url(./img/portrait/",
         defaultBossImage : "url(./img/portrait/Default.png)",
         bossIconPath : "url(./img/icon/boss/",
@@ -471,8 +485,10 @@ class config {
             "1040515000", "1040314600", "1040814900", "1040115400", "1040711500", "1040616900",
             "1040814000", "1040515100", "1040024100", "1040314700", "1040419600", "1040218000",
             /*Magna3 Weapons*/"1040119200", "1040516800", "1040713400", "1040219100", "1040516900", "1040916200",
-            /*Exo Weapons */ "1040118000", "1040516300", "1040218500", "1040119900",
-            "1040712400", "1040618400", "1040423200"
+            /*Exo Weapons*/ "1040118000", "1040516300", "1040218500", "1040119900",
+            "1040712400", "1040026900", "1040618400", "1040423200",
+            /**Celestial Weapons*/ "1040219400", "1040713600", "1040120100", "1040423300", "1040618600",
+            "1040025400", "1040816300", "1040319100", "1040916900",
         ],
         "skillItemIds" : ["1029900000", "1039900000"],
         "angelWeaponIds": [
@@ -515,6 +531,11 @@ class config {
             {filter: "brightness(1)"}
         ],
         timing: 750
+    }
+    autoScrollValues = {
+        "scrollAmount": 0,
+        "scrollDirection": 1,
+        "scrollScalar": 0.5,
     }
 
     constructor() {
@@ -574,11 +595,21 @@ class config {
                 }
             }
         }
-        return undefined;
     }
 
     getDefaultLootImage(){return this.defaultAssetUrls.defaultLootImage;}
 
+    getDefaultLootImage(itemId){
+        if (!/^\d+$/.test(itemId)){return this.defaultAssetUrls.defaultLootImage;}
+        if (typeof itemId == "string"){itemId = Number(itemId);}
+        switch(itemId){
+            case itemId < 10000:
+                return this.defaultAssetUrls.defaultLootImage;
+            
+        }
+    }
+
+    // TODO find return different default URL depending on lootID
     getFullLootUrl(lootId){
         if (typeof lootId != "string"){
             console.log("ERROR: stageName passed to getFullLootUrl was not of type \"string\" but of type " + typeof lootId, lootId);

@@ -100,6 +100,27 @@
  * @property {RegExp} whitelist - URLs that will pass the network listener
  */
 
+/**
+ * @typedef ControllerElements
+ * @property {HTMLElement} controllerHead
+ * @property {HTMLElement} addTrackerButton
+ * @property {HTMLElement} removeTrackerButton
+ * @property {HTMLElement} clearTrackersButton
+ * @property {HTMLElement} controllerBody
+ * @property {HTMLElement} backgroundShadow
+ * @property {HTMLElement} stageSelectMenu
+ * @property {HTMLElement} stageSelectGroups
+ * @property {HTMLElement} dataPeriodButton
+ * @property {HTMLElement} dataPeriodText
+ * @property {HTMLElement} dataPeriodSelector
+ * @property {HTMLElement} timerText
+ * @property {HTMLElement} resetTimerButton
+ * @property {HTMLElement} lastDrop
+ * @property {HTMLElement} lastDropName
+ * @property {HTMLElement} lastDropItemsContainer
+ * @property {HTMLElement} lastDropItems
+ */
+
 /** 
  * A collection of HTML elements containing different pieces of the tracker instance 
  * @typedef trackerElements
