@@ -1047,7 +1047,7 @@ class DataProcessor {
         // Event was a raid and not a solo battle
         if (+eventType == 3 && tokenWinning == 20){ // Special case where the guild war boss could be either Extreme, Extreme+ or Nightmare 90...
             tokenWinning = eventData.filter((obj) => {return (obj?.reward_type && obj.reward_type === "starting the battle")})[0].get_num;
-            console.log("Token count was calculated with being host because of special conditions being met...\n New token count: " + tokenCount);
+            console.log("Token count was calculated with being host because of special conditions being met...\n New token count: " + tokenWinning);
         }
         
         eventDifficulty = tokensToDificulty[eventType].tokens[tokenWinning];

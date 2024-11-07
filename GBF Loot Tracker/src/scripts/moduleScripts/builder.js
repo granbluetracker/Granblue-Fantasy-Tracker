@@ -447,10 +447,12 @@ class stageSelectorBuilder {
                     tokenSubgroup.appendChild(this.buildSubgroupTitle("Token Events"));
                     solotreasureSubgroup = this.buildElement("div", ["stage-selector-subgroup","l-subgroup","hidden"]);
                     solotreasureSubgroup.appendChild(this.buildSubgroupTitle("Solo Treasure Events"));
-                    guildwarSubgroup = this.buildElement("div", ["stage-selector-subgroup","l-subgroup","hidden"]);
-                    guildwarSubgroup.appendChild(this.buildSubgroupTitle("Guild Wars"));
                     groupElement.appendChild(tokenSubgroup);
                     groupElement.appendChild(solotreasureSubgroup);  
+                    break;
+                case "Guild War":
+                    guildwarSubgroup = this.buildElement("div", ["stage-selector-subgroup","l-subgroup","hidden"]);
+                    guildwarSubgroup.appendChild(this.buildSubgroupTitle("Guild Wars"));
                     groupElement.appendChild(guildwarSubgroup);
                     break;
             }
